@@ -1,0 +1,193 @@
+:root {
+    --text: #000;
+    --muted: #828282;
+    --line: rgba(0, 0, 0, .1);
+    --accent: #b509ac;
+    --background: #fff;
+}
+
+* { box-sizing: border-box; }
+html { font-size: 20px; scroll-behavior: smooth; scroll-padding-top: 88px; }
+
+body {
+    margin: 0;
+    color: var(--text);
+    background: var(--background);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, .96);
+}
+
+.topbar nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 26px;
+    width: min(1400px, calc(100% - 64px));
+    margin: 0 auto;
+    padding: 16px 0;
+    font-size: 1rem;
+}
+
+.topbar a { color: var(--text); }
+
+main,
+footer {
+    width: min(1400px, calc(100% - 64px));
+    margin-inline: auto;
+}
+
+main { padding: 64px 0 72px; }
+section { padding: 30px 0; }
+section + section { margin-top: 10px; }
+
+.about {
+    display: flow-root;
+    min-height: 280px;
+    padding-top: 0;
+}
+
+.profile-photo {
+    float: right;
+    width: 300px;
+    height: 400px;
+    margin: 0 0 24px 44px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.about-copy,
+.about p { max-width: 980px; }
+.role { color: var(--muted); }
+.contact-list { margin-top: 22px; }
+.contact-list p { margin-bottom: 6px; }
+
+h1 {
+    margin: 0 0 28px;
+    font-size: 2.5rem;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -.025em;
+}
+
+h1 strong { font-weight: 700; }
+h1 span { font-size: .5em; font-weight: 400; white-space: nowrap; }
+
+h2 {
+    margin: 0 0 22px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid var(--line);
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+h3 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+p { margin: 0 0 16px; }
+
+.education-list article,
+.project-list article,
+.skill-list > div {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 26px;
+    padding: 18px 0;
+}
+
+.education-list article + article,
+.project-list article + article,
+.skill-list > div + div { border-top: 1px solid var(--line); }
+
+.education-list time,
+.project-meta,
+.skill-list dt {
+    color: var(--muted);
+    font-size: .875rem;
+}
+
+.education-list p,
+.project-list p { margin: 0; }
+.project-meta { margin-top: 4px !important; }
+.skill-list { margin: 0; }
+.skill-list dt { font-weight: 600; }
+.skill-list dd { margin: 0; }
+
+.collection-list article {
+    display: grid;
+    grid-template-columns: minmax(260px, .8fr) minmax(0, 1.7fr);
+    gap: 44px;
+    padding: 24px 0;
+}
+
+.collection-list article + article { border-top: 1px solid var(--line); }
+.collection-list p { margin: 0; color: var(--muted); }
+.collection-meta { color: var(--muted); font-size: .875rem; }
+.section-intro { max-width: 900px; margin-bottom: 14px; color: var(--muted); }
+
+.blog-empty { padding: 22px 0; color: var(--muted); }
+.blog-empty strong { color: var(--text); }
+.blog-empty p { margin: 6px 0 0; }
+
+footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 25px 0 40px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 13px;
+}
+
+@media (max-width: 620px) {
+    html { font-size: 16px; }
+
+    .topbar nav {
+        justify-content: flex-start;
+        gap: 18px;
+        overflow-x: auto;
+    }
+
+    main,
+    footer,
+    .topbar nav { width: min(100% - 32px, 1400px); }
+    main { padding-top: 46px; }
+
+    .profile-photo {
+        float: none;
+        width: 150px;
+        height: 200px;
+        margin: 0 0 28px;
+    }
+
+    .collection-list article,
+    .education-list article,
+    .project-list article,
+    .skill-list > div { grid-template-columns: 1fr; }
+
+    .collection-list article { gap: 4px; }
+    .education-list article,
+    .project-list article,
+    .skill-list > div { gap: 6px; }
+    footer { flex-direction: column; gap: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+}
