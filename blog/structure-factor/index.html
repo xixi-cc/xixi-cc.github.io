@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>静态与动态结构因子 S(k) · 曹溪能</title>
+    <meta name="description" content="从 Fourier 定义、实空间关联和超均匀性，到周期粒子模拟、壳平均与 Type-1 NUFFT 的结构因子笔记。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://xixi-cc.github.io/blog/structure-factor/">
+    <meta property="og:title" content="静态与动态结构因子 S(k)">
+    <meta property="og:description" content="结构因子的定义、物理意义、有限尺寸效应与高精度数值计算。">
+    <meta property="og:image" content="https://xixi-cc.github.io/assets/blog/structure-factor-runtime.png">
+    <meta property="article:published_time" content="2026-08-26">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="静态与动态结构因子 S(k)">
+    <meta name="twitter:description" content="结构因子的定义、物理意义、有限尺寸效应与高精度数值计算。">
+    <meta name="twitter:image" content="https://xixi-cc.github.io/assets/blog/structure-factor-runtime.png">
+    <link rel="canonical" href="https://xixi-cc.github.io/blog/structure-factor/">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../blog.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="article-page">
+    <header class="topbar">
+        <nav aria-label="主导航">
+            <a href="../../">主页</a>
+            <a href="../../#reading">论文追踪</a>
+            <a href="../../#blog" aria-current="page">博客</a>
+        </nav>
+    </header>
+
+    <main class="article-shell">
+        <article class="blog-article">
+            <header class="article-header">
+                <p class="article-kicker"><a href="../../#blog">研究笔记</a></p>
+                <h1>静态与动态结构因子 <span class="arithmatex">\(S(k)\)</span></h1>
+                <p class="article-meta"><time datetime="2026-08-26">2026 年 8 月 26 日</time> · 理论与数值方法</p>
+            </header>
+
+            <details class="mobile-toc">
+                <summary>文章目录</summary>
+                <div class="toc">
+<ul>
+<li><a href="#1-定义与-fourier-约定">1. 定义与 Fourier 约定</a></li>
+<li><a href="#2-与实空间密度关联函数的关系">2. 与实空间密度关联函数的关系</a><ul>
+<li><a href="#21-两个常见的-fourier-渐近例子">2.1 两个常见的 Fourier 渐近例子</a></li>
+</ul>
+</li>
+<li><a href="#3-超均匀普通涨落与巨数涨落">3. 超均匀、普通涨落与巨数涨落</a></li>
+<li><a href="#4-窗口内粒子数涨落">4. 窗口内粒子数涨落</a></li>
+<li><a href="#5-独立随机位移是否破坏超均匀性">5. 独立随机位移是否破坏超均匀性</a></li>
+<li><a href="#6-吸收态转变中的超均匀指数">6. 吸收态转变中的超均匀指数</a></li>
+<li><a href="#7-动态结构因子-skomega">7. 动态结构因子 \(S(k,\omega)\)</a><ul>
+<li><a href="#71-扩散密度模">7.1 扩散密度模</a></li>
+<li><a href="#72-热扩散峰与声峰">7.2 热扩散峰与声峰</a></li>
+</ul>
+</li>
+<li><a href="#8-周期性粒子模拟中如何计算-sk">8. 周期性粒子模拟中如何计算 \(S(k)\)</a><ul>
+<li><a href="#81-单个构型">8.1 单个构型</a></li>
+<li><a href="#82-壳平均">8.2 壳平均</a></li>
+<li><a href="#83-使用-type-1-nufft-加速">8.3 使用 Type-1 NUFFT 加速</a></li>
+<li><a href="#84-有限尺寸与拟合注意事项">8.4 有限尺寸与拟合注意事项</a></li>
+</ul>
+</li>
+<li><a href="#附录d-维球形窗口的形状因子">附录：\(d\) 维球形窗口的形状因子</a></li>
+<li><a href="#参考资料">参考资料</a></li>
+</ul>
+</div>
+
+            </details>
+
+            <div class="article-layout">
+                <aside class="article-toc" aria-label="文章目录">
+                    <strong>文章目录</strong>
+                    <div class="toc">
+<ul>
+<li><a href="#1-定义与-fourier-约定">1. 定义与 Fourier 约定</a></li>
+<li><a href="#2-与实空间密度关联函数的关系">2. 与实空间密度关联函数的关系</a><ul>
+<li><a href="#21-两个常见的-fourier-渐近例子">2.1 两个常见的 Fourier 渐近例子</a></li>
+</ul>
+</li>
+<li><a href="#3-超均匀普通涨落与巨数涨落">3. 超均匀、普通涨落与巨数涨落</a></li>
+<li><a href="#4-窗口内粒子数涨落">4. 窗口内粒子数涨落</a></li>
+<li><a href="#5-独立随机位移是否破坏超均匀性">5. 独立随机位移是否破坏超均匀性</a></li>
+<li><a href="#6-吸收态转变中的超均匀指数">6. 吸收态转变中的超均匀指数</a></li>
+<li><a href="#7-动态结构因子-skomega">7. 动态结构因子 \(S(k,\omega)\)</a><ul>
+<li><a href="#71-扩散密度模">7.1 扩散密度模</a></li>
+<li><a href="#72-热扩散峰与声峰">7.2 热扩散峰与声峰</a></li>
+</ul>
+</li>
+<li><a href="#8-周期性粒子模拟中如何计算-sk">8. 周期性粒子模拟中如何计算 \(S(k)\)</a><ul>
+<li><a href="#81-单个构型">8.1 单个构型</a></li>
+<li><a href="#82-壳平均">8.2 壳平均</a></li>
+<li><a href="#83-使用-type-1-nufft-加速">8.3 使用 Type-1 NUFFT 加速</a></li>
+<li><a href="#84-有限尺寸与拟合注意事项">8.4 有限尺寸与拟合注意事项</a></li>
+</ul>
+</li>
+<li><a href="#附录d-维球形窗口的形状因子">附录：\(d\) 维球形窗口的形状因子</a></li>
+<li><a href="#参考资料">参考资料</a></li>
+</ul>
+</div>
+
+                </aside>
+                <div class="article-content">
+                    <p>结构因子描述密度涨落在波数空间中的分布。小波数对应大尺度结构，因此 <span class="arithmatex">\(S(k\to0)\)</span> 常用于判断体系是普通涨落、超均匀，还是具有巨数涨落。本文固定 Fourier 约定，推导 <span class="arithmatex">\(S(k)\)</span> 与实空间关联函数、窗口内粒子数涨落和动态结构因子之间的关系，并给出周期性模拟中的计算方法。</p>
+<h2 id="1-定义与-fourier-约定">1. 定义与 Fourier 约定</h2>
+<p>考虑 <span class="arithmatex">\(d\)</span> 维周期性立方盒，体积为 <span class="arithmatex">\(V=L^d\)</span>，其中有 <span class="arithmatex">\(N\)</span> 个点粒子，平均数密度为</p>
+<div class="arithmatex">\[
+\rho_0=\frac{N}{V}.
+\]</div>
+<p>微观密度场定义为</p>
+<div class="arithmatex">\[
+\rho(\mathbf r)=\sum_{j=1}^{N}\delta(\mathbf r-\mathbf r_j).
+\]</div>
+<p>采用 Fourier 约定</p>
+<div class="arithmatex">\[
+\rho_{\mathbf k}
+=\int_V d^d r\,\rho(\mathbf r)e^{-i\mathbf k\cdot\mathbf r}
+=\sum_{j=1}^{N}e^{-i\mathbf k\cdot\mathbf r_j},
+\]</div>
+<div class="arithmatex">\[
+\rho(\mathbf r)=\frac{1}{V}\sum_{\mathbf k}
+\rho_{\mathbf k}e^{i\mathbf k\cdot\mathbf r},
+\qquad
+\mathbf k=\frac{2\pi}{L}(n_1,\ldots,n_d),
+\]</div>
+<p>其中 <span class="arithmatex">\(n_a\in\mathbb Z\)</span>。由于 <span class="arithmatex">\(\rho(\mathbf r)\)</span> 为实场，<span class="arithmatex">\(\rho_{-\mathbf k}=\rho_{\mathbf k}^{*}\)</span>。</p>
+<p>令</p>
+<div class="arithmatex">\[
+\delta\rho_{\mathbf k}
+=\rho_{\mathbf k}-\langle\rho_{\mathbf k}\rangle.
+\]</div>
+<p>静态结构因子定义为</p>
+<div class="arithmatex">\[
+S(\mathbf k)
+=\frac{1}{N}
+\left\langle
+\delta\rho_{\mathbf k}\delta\rho_{-\mathbf k}
+\right\rangle.
+\]</div>
+<p>对于平移不变的均匀体系，任意非零允许波矢均满足 <span class="arithmatex">\(\langle\rho_{\mathbf k}\rangle=0\)</span>，因此</p>
+<div class="arithmatex">\[
+\begin{aligned}
+S(\mathbf k)
+&amp;=\frac{1}{N}\left\langle|\rho_{\mathbf k}|^2\right\rangle\\
+&amp;=1+\frac{1}{N}
+\left\langle
+\sum_{i\ne j}
+e^{-i\mathbf k\cdot(\mathbf r_i-\mathbf r_j)}
+\right\rangle,
+\qquad \mathbf k\ne0.
+\end{aligned}
+\]</div>
+<p>在固定粒子数的系综中，<span class="arithmatex">\(\delta\rho_{\mathbf0}=0\)</span>，所以 <span class="arithmatex">\(S(\mathbf0)=0\)</span> 是粒子数约束导致的平凡结果。讨论 <span class="arithmatex">\(k\to0\)</span> 时，应使用一系列非零允许波矢，而不是把零模当作小波数数据点。</p>
+<p>若体系各向同性，可对模长相近的波矢作壳平均并记为 <span class="arithmatex">\(S(k)\)</span>，其中 <span class="arithmatex">\(k=|\mathbf k|\)</span>。各向异性体系则应保留完整的 <span class="arithmatex">\(S(\mathbf k)\)</span>。</p>
+<h2 id="2-与实空间密度关联函数的关系">2. 与实空间密度关联函数的关系</h2>
+<p>定义连通密度关联函数</p>
+<div class="arithmatex">\[
+C(\mathbf r)
+=\left\langle
+\delta\rho(\mathbf0)\delta\rho(\mathbf r)
+\right\rangle,
+\qquad
+\delta\rho(\mathbf r)=\rho(\mathbf r)-\rho_0.
+\]</div>
+<p>利用平移不变性，对非零波矢有</p>
+<div class="arithmatex">\[
+\begin{aligned}
+S(\mathbf k)
+&amp;=\frac{1}{N}
+\int_V d^d r\,d^d r'\,
+e^{-i\mathbf k\cdot(\mathbf r-\mathbf r')}
+\left\langle
+\delta\rho(\mathbf r)\delta\rho(\mathbf r')
+\right\rangle\\
+&amp;=\frac{V}{N}
+\int d^d r\,e^{-i\mathbf k\cdot\mathbf r}C(\mathbf r)\\
+&amp;=\frac{1}{\rho_0}\widetilde C(\mathbf k).
+\end{aligned}
+\]</div>
+<p>若以径向分布函数 <span class="arithmatex">\(g_2(\mathbf r)\)</span> 表示二体关联，并定义总关联函数 <span class="arithmatex">\(h(\mathbf r)=g_2(\mathbf r)-1\)</span>，则</p>
+<div class="arithmatex">\[
+C(\mathbf r)
+=\rho_0\delta(\mathbf r)+\rho_0^2h(\mathbf r),
+\]</div>
+<p>从而</p>
+<div class="arithmatex">\[
+S(\mathbf k)=1+\rho_0\widetilde h(\mathbf k).
+\]</div>
+<p>自关联产生常数项 <span class="arithmatex">\(1\)</span>；粒子间关联决定 <span class="arithmatex">\(S(\mathbf k)\)</span> 相对于泊松分布的偏离。理想泊松点过程满足 <span class="arithmatex">\(h(\mathbf r)=0\)</span>，所以</p>
+<div class="arithmatex">\[
+S(\mathbf k)=1.
+\]</div>
+<h3 id="21-两个常见的-fourier-渐近例子">2.1 两个常见的 Fourier 渐近例子</h3>
+<p>若关联函数具有不可积的长程幂律尾部</p>
+<div class="arithmatex">\[
+C(r)\sim r^{-\gamma},
+\qquad 0&lt;\gamma&lt;d,
+\]</div>
+<p>则其小波数非解析部分满足</p>
+<div class="arithmatex">\[
+S(k)\sim k^{\gamma-d}.
+\]</div>
+<p>由于 <span class="arithmatex">\(\gamma-d&lt;0\)</span>，这种长程正关联对应小波数发散，而不是超均匀性。</p>
+<p>作为短程关联的简单例子，若某一关联贡献按 <span class="arithmatex">\(e^{-r/\xi}\)</span> 衰减，则</p>
+<div class="arithmatex">\[
+\int d^d r\,e^{-i\mathbf k\cdot\mathbf r}e^{-r/\xi}
+\propto
+\xi^d\left[1+(k\xi)^2\right]^{-(d+1)/2}.
+\]</div>
+<p>因此它在 <span class="arithmatex">\(k\xi\ll1\)</span> 时是解析的，首个修正为 <span class="arithmatex">\(O(k^2)\)</span>；在 <span class="arithmatex">\(k\xi\gg1\)</span> 时按 <span class="arithmatex">\(k^{-(d+1)}\)</span> 衰减。这里讨论的是单个指数关联贡献，完整结构因子还可能包含自关联和其他关联项。</p>
+<h2 id="3-超均匀普通涨落与巨数涨落">3. 超均匀、普通涨落与巨数涨落</h2>
+<p>若非零波矢的结构因子满足</p>
+<div class="arithmatex">\[
+S(k)\sim A k^{\alpha},
+\qquad k\to0,
+\]</div>
+<p>则可按指数 <span class="arithmatex">\(\alpha\)</span> 区分三种大尺度行为：</p>
+<ul>
+<li><span class="arithmatex">\(\alpha&gt;0\)</span>：<span class="arithmatex">\(S(k\to0)=0\)</span>，体系是超均匀的；</li>
+<li><span class="arithmatex">\(\alpha=0\)</span>：<span class="arithmatex">\(S(k\to0)\)</span> 趋于非零常数，对应普通体积标度涨落；</li>
+<li><span class="arithmatex">\(-d&lt;\alpha&lt;0\)</span>：<span class="arithmatex">\(S(k\to0)\)</span> 发散，对应巨数涨落。</li>
+</ul>
+<p>超均匀性要求长波密度涨落被抑制。由</p>
+<div class="arithmatex">\[
+S(\mathbf0)=1+\rho_0\int d^d r\,h(\mathbf r)
+\]</div>
+<p>可见，在热力学极限下，超均匀点过程满足总和规则</p>
+<div class="arithmatex">\[
+\rho_0\int d^d r\,h(\mathbf r)=-1.
+\]</div>
+<p>这个负的积分表示粒子间反关联恰好抵消自关联在零波数处的贡献。由 <span class="arithmatex">\(S(k)\sim k^{\alpha}\)</span> 直接推断 <span class="arithmatex">\(h(r)\)</span> 的尾部需要额外正则性条件；不能对任意 <span class="arithmatex">\(\alpha\)</span> 无条件写成同一个实空间幂律。</p>
+<h2 id="4-窗口内粒子数涨落">4. 窗口内粒子数涨落</h2>
+<p>设 <span class="arithmatex">\(w_R(\mathbf r)\)</span> 是尺度为 <span class="arithmatex">\(R\)</span> 的观察窗口指标函数：窗口内取 <span class="arithmatex">\(1\)</span>，窗口外取 <span class="arithmatex">\(0\)</span>。窗口内粒子数为</p>
+<div class="arithmatex">\[
+N_R=\int d^d r\,w_R(\mathbf r)\rho(\mathbf r).
+\]</div>
+<p>定义窗口重叠核</p>
+<div class="arithmatex">\[
+\alpha_R(\mathbf r)
+=\int d^d R'\,
+w_R(\mathbf R')w_R(\mathbf R'+\mathbf r).
+\]</div>
+<p>粒子数方差在实空间中为</p>
+<div class="arithmatex">\[
+\operatorname{Var}(N_R)
+=\int d^d r\,C(\mathbf r)\alpha_R(\mathbf r),
+\]</div>
+<p>在 Fourier 空间中为</p>
+<div class="arithmatex">\[
+\operatorname{Var}(N_R)
+=\frac{\rho_0}{(2\pi)^d}
+\int d^d k\,S(\mathbf k)
+\left|\widetilde w_R(\mathbf k)\right|^2.
+\]</div>
+<p>若 <span class="arithmatex">\(w_R(\mathbf r)=w_1(\mathbf r/R)\)</span>，则</p>
+<div class="arithmatex">\[
+\widetilde w_R(\mathbf k)
+=R^d\widetilde w_1(R\mathbf k).
+\]</div>
+<p>对球形或具有足够规则边界的窗口，若 <span class="arithmatex">\(S(k)\sim k^{\alpha}\)</span>，则大 <span class="arithmatex">\(R\)</span> 渐近行为为</p>
+<div class="arithmatex">\[
+\operatorname{Var}(N_R)\sim
+\begin{cases}
+R^{d-\alpha}, &amp; -d&lt;\alpha&lt;1,\\[1mm]
+R^{d-1}\ln R, &amp; \alpha=1,\\[1mm]
+R^{d-1}, &amp; \alpha&gt;1.
+\end{cases}
+\]</div>
+<p>其中 <span class="arithmatex">\(\alpha&lt;0\)</span> 对应巨数涨落，<span class="arithmatex">\(\alpha=0\)</span> 给出泊松型体积标度，<span class="arithmatex">\(0&lt;\alpha&lt;1\)</span> 对应超均匀但仍大于表面积标度的方差。<span class="arithmatex">\(\alpha\ge1\)</span> 时，窗口边界主导渐近行为。</p>
+<p>由于平均粒子数满足 <span class="arithmatex">\(\langle N_R\rangle\propto R^d\)</span>，若忽略 <span class="arithmatex">\(\alpha=1\)</span> 的对数修正并写成</p>
+<div class="arithmatex">\[
+\operatorname{Var}(N_R)
+\propto\langle N_R\rangle^{\beta},
+\]</div>
+<p>则</p>
+<div class="arithmatex">\[
+\beta=
+\begin{cases}
+1-\dfrac{\alpha}{d}, &amp; -d&lt;\alpha&lt;1,\\[2mm]
+1-\dfrac{1}{d}, &amp; \alpha&gt;1.
+\end{cases}
+\]</div>
+<p>在 <span class="arithmatex">\(\alpha=1\)</span> 时还要乘以 <span class="arithmatex">\(\ln R\)</span>，因此不能仅用一个纯幂指数完整描述。对于与晶格方向锁定的非球形窗口，数目方差还可能依赖窗口形状和取向。</p>
+<h2 id="5-独立随机位移是否破坏超均匀性">5. 独立随机位移是否破坏超均匀性</h2>
+<p>在吸收态模型中，常用“自然初态”构造是：先让体系进入吸收态，再对每个粒子施加小位移以重新激活体系。设</p>
+<div class="arithmatex">\[
+\mathbf R_i' = \mathbf R_i+\mathbf u_i,
+\]</div>
+<p>其中位移 <span class="arithmatex">\(\mathbf u_i\)</span> 独立同分布，并与原始粒子构型独立。定义位移分布的特征函数</p>
+<div class="arithmatex">\[
+\Phi(\mathbf k)
+=\left\langle e^{-i\mathbf k\cdot\mathbf u}\right\rangle.
+\]</div>
+<p>对任意非零波矢，位移后的结构因子精确满足</p>
+<div class="arithmatex">\[
+S'(\mathbf k)
+=1-|\Phi(\mathbf k)|^2
++|\Phi(\mathbf k)|^2S(\mathbf k).
+\]</div>
+<p>推导的关键是区分 <span class="arithmatex">\(i=j\)</span> 的自关联项和 <span class="arithmatex">\(i\ne j\)</span> 的粒子间关联项：前者恒为 <span class="arithmatex">\(1\)</span>，后者被 <span class="arithmatex">\(|\Phi(\mathbf k)|^2\)</span> 乘法修正。</p>
+<p>若位移分布均值为零、各向同性且具有有限四阶矩，并定义单个笛卡尔分量的方差为</p>
+<div class="arithmatex">\[
+\langle u_a u_b\rangle=\sigma_u^2\delta_{ab},
+\]</div>
+<p>则</p>
+<div class="arithmatex">\[
+\Phi(\mathbf k)
+=1-\frac{1}{2}\sigma_u^2k^2+O(k^4),
+\]</div>
+<div class="arithmatex">\[
+|\Phi(\mathbf k)|^2
+=1-\sigma_u^2k^2+O(k^4).
+\]</div>
+<p>因此</p>
+<div class="arithmatex">\[
+S'(k)
+=S(k)+\sigma_u^2k^2[1-S(k)]+O(k^4).
+\]</div>
+<p>若原体系满足 <span class="arithmatex">\(S(k)\sim A k^{\alpha}\)</span> 且 <span class="arithmatex">\(\alpha&gt;0\)</span>，则位移后的小波数指数为</p>
+<div class="arithmatex">\[
+\alpha'=\min(\alpha,2).
+\]</div>
+<p>具体地：</p>
+<ul>
+<li><span class="arithmatex">\(0&lt;\alpha&lt;2\)</span> 时，原来的 <span class="arithmatex">\(k^{\alpha}\)</span> 项占主导，指数不变；</li>
+<li><span class="arithmatex">\(\alpha=2\)</span> 时，位移改变 <span class="arithmatex">\(k^2\)</span> 项的系数；</li>
+<li><span class="arithmatex">\(\alpha&gt;2\)</span> 时，独立有限方差位移生成 <span class="arithmatex">\(k^2\)</span> 项，将指数降为 <span class="arithmatex">\(2\)</span>。</li>
+</ul>
+<p>因此这类位移不会把超均匀体系变成普通泊松体系，但会把强于 <span class="arithmatex">\(k^2\)</span> 的小波数抑制截断到 <span class="arithmatex">\(k^2\)</span>。若位移具有空间关联、重尾分布或与初始构型相关，上述结论需要重新推导。</p>
+<h2 id="6-吸收态转变中的超均匀指数">6. 吸收态转变中的超均匀指数</h2>
+<p>守恒有向渗流（conserved directed percolation, C-DP）、Manna 模型和随机组织模型的临界吸收态可以出现超均匀性，但其指数关系仍涉及活跃研究。</p>
+<p>较早的工作基于 C-DP 与 quenched Edwards–Wilkinson depinning 的映射，提出过</p>
+<div class="arithmatex">\[
+\alpha_{\mathrm{HU}}
+\stackrel{\text{conjecture}}{=}
+4-d-2\zeta_{\mathrm{dep}},
+\]</div>
+<p>其中 <span class="arithmatex">\(\zeta_{\mathrm{dep}}\)</span> 是 depinning 粗糙度指数。这个关系应标记为历史猜想，而不是确定标度律。</p>
+<p>后续 Doi–Peliti 场论指出，C-DP 在 <span class="arithmatex">\(d=4-\epsilon\)</span> 附近的超均匀指数为</p>
+<div class="arithmatex">\[
+\alpha_{\mathrm{HU}}
+=\frac{2\epsilon}{9}+O(\epsilon^2),
+\]</div>
+<p>并明确否定了上述简单 depinning 标度关系。更新的随机组织场论进一步指出，守恒噪声可能是危险无关变量，使随机组织与 C-DP 共享若干临界指数，却具有不同的超均匀指数。因此，分析具体模型时应说明模型、噪声结构、维数和所采用的理论或数值估计，不能把单一公式普遍用于所有吸收态模型。</p>
+<h2 id="7-动态结构因子-skomega">7. 动态结构因子 <span class="arithmatex">\(S(k,\omega)\)</span></h2>
+<p>对时间平移不变的稳态，定义中间散射函数</p>
+<div class="arithmatex">\[
+F(\mathbf k,t)
+=\frac{1}{N}
+\left\langle
+\delta\rho_{\mathbf k}(t)
+\delta\rho_{-\mathbf k}(0)
+\right\rangle.
+\]</div>
+<p>动态结构因子定义为</p>
+<div class="arithmatex">\[
+S(\mathbf k,\omega)
+=\int_{-\infty}^{\infty}dt\,
+e^{i\omega t}F(\mathbf k,t).
+\]</div>
+<p>静态结构因子是等时关联</p>
+<div class="arithmatex">\[
+S(\mathbf k)=F(\mathbf k,0),
+\]</div>
+<p>并满足频率总和规则</p>
+<div class="arithmatex">\[
+S(\mathbf k)
+=\frac{1}{2\pi}
+\int_{-\infty}^{\infty}d\omega\,
+S(\mathbf k,\omega).
+\]</div>
+<p>若体系在小波数下只有一个特征频率尺度 <span class="arithmatex">\(\omega_k\sim k^z\)</span>，则与总和规则一致的动态标度形式是</p>
+<div class="arithmatex">\[
+S(k,\omega)
+=S(k)k^{-z}
+f\!\left(\frac{\omega}{k^z}\right),
+\]</div>
+<p>其中标度函数归一化为</p>
+<div class="arithmatex">\[
+\frac{1}{2\pi}\int_{-\infty}^{\infty}dx\,f(x)=1.
+\]</div>
+<h3 id="71-扩散密度模">7.1 扩散密度模</h3>
+<p>对线性扩散模，若</p>
+<div class="arithmatex">\[
+F(k,t)=S(k)e^{-Dk^2|t|},
+\]</div>
+<p>则</p>
+<div class="arithmatex">\[
+S(k,\omega)
+=\frac{2S(k)Dk^2}
+{\omega^2+(Dk^2)^2}.
+\]</div>
+<p>若静态结构因子满足 <span class="arithmatex">\(S(k)\sim k^{\alpha}\)</span>，零频附近谱峰的宽度按 <span class="arithmatex">\(k^2\)</span> 缩小，而峰高按 <span class="arithmatex">\(k^{\alpha-2}\)</span> 标度。</p>
+<h3 id="72-热扩散峰与声峰">7.2 热扩散峰与声峰</h3>
+<p>简单流体同时具有位于 <span class="arithmatex">\(\omega=0\)</span> 的 Rayleigh 热扩散峰和位于 <span class="arithmatex">\(\omega=\pm c_s k\)</span> 的 Brillouin 声峰。忽略更高阶修正时，可写成归一化的示意形式</p>
+<div class="arithmatex">\[
+\begin{aligned}
+S(k,\omega)\simeq S(k)\Bigg[
+&amp;A_R\frac{2D_Tk^2}{\omega^2+(D_Tk^2)^2}\\
+&amp;+\frac{A_B}{2}\sum_{\pm}
+\frac{2\Gamma k^2}
+{(\omega\mp c_s k)^2+(\Gamma k^2)^2}
+\Bigg],
+\end{aligned}
+\]</div>
+<p>其中 <span class="arithmatex">\(A_R+A_B=1\)</span>。<span class="arithmatex">\(A_R\)</span>、<span class="arithmatex">\(A_B\)</span> 的具体热力学权重以及 <span class="arithmatex">\(D_T\)</span>、<span class="arithmatex">\(c_s\)</span>、<span class="arithmatex">\(\Gamma\)</span> 取决于模型。这个谱同时含有传播尺度 <span class="arithmatex">\(\omega\sim k\)</span> 和衰减尺度 <span class="arithmatex">\(\omega\sim k^2\)</span>，因此不能用单一动态指数完整描述。</p>
+<p>静态 <span class="arithmatex">\(S(k)\)</span> 回答“每个尺度上有多少密度涨落”，动态 <span class="arithmatex">\(S(k,\omega)\)</span> 进一步区分这些涨落是扩散、传播还是弛豫，以及相应的时间尺度。</p>
+<p>非稳态体系不具备时间平移不变性，应使用双时间关联 <span class="arithmatex">\(F(\mathbf k;t,t')\)</span>，而不能直接套用只依赖时间差的 <span class="arithmatex">\(S(k,\omega)\)</span>。</p>
+<h2 id="8-周期性粒子模拟中如何计算-sk">8. 周期性粒子模拟中如何计算 <span class="arithmatex">\(S(k)\)</span></h2>
+<h3 id="81-单个构型">8.1 单个构型</h3>
+<p>对边长为 <span class="arithmatex">\(L\)</span> 的二维周期性方盒，允许波矢为</p>
+<div class="arithmatex">\[
+\mathbf k=\frac{2\pi}{L}(n_x,n_y),
+\qquad n_x,n_y\in\mathbb Z.
+\]</div>
+<p>对每个非零波矢计算</p>
+<div class="arithmatex">\[
+\rho_{\mathbf k}
+=\sum_{j=1}^{N}
+e^{-i\mathbf k\cdot\mathbf r_j}
+=\sum_j\cos(\mathbf k\cdot\mathbf r_j)
+-i\sum_j\sin(\mathbf k\cdot\mathbf r_j),
+\]</div>
+<p>以及单构型散射强度</p>
+<div class="arithmatex">\[
+\widehat S(\mathbf k)=\frac{|\rho_{\mathbf k}|^2}{N}.
+\]</div>
+<p>平移不变体系的 <span class="arithmatex">\(S(\mathbf k)\)</span> 是 <span class="arithmatex">\(\widehat S(\mathbf k)\)</span> 的系综平均。实际模拟通常用多个充分间隔的稳态快照估计该平均；若样本在时间上相关，应估计有效独立样本数和误差。</p>
+<h3 id="82-壳平均">8.2 壳平均</h3>
+<p>只有在体系预期各向同性时，才将 <span class="arithmatex">\(|\mathbf k|\)</span> 落入同一窄区间的模式平均成 <span class="arithmatex">\(S(k)\)</span>。建议同时记录每个壳内的平均 <span class="arithmatex">\(k\)</span>、模式数和跨快照误差。正方盒不禁止按照模长分箱，但原始采样点必须来自笛卡尔倒格矢，不能把任意连续极坐标波矢当作周期边界下的允许模式。</p>
+<p>下面的 C++ 示例同时对独立波矢和快照累加，并显式跳过零模：</p>
+<pre><code class="language-cpp">#include &lt;cmath&gt;
+#include &lt;complex&gt;
+#include &lt;cstddef&gt;
+#include &lt;vector&gt;
+
+struct Particle {
+    double x;
+    double y;
+};
+
+void accumulate_radial_sk(
+    const std::vector&lt;Particle&gt;&amp; particles,
+    double box_length,
+    int n_max,
+    double delta_k,
+    std::vector&lt;double&gt;&amp; k_sum,
+    std::vector&lt;double&gt;&amp; sk_sum,
+    std::vector&lt;std::size_t&gt;&amp; sample_count
+) {
+    if (particles.empty() || box_length &lt;= 0.0 || delta_k &lt;= 0.0) {
+        return;
+    }
+
+    constexpr double PI = 3.14159265358979323846;
+    const double k_min = 2.0 * PI / box_length;
+    const double inv_n = 1.0 / static_cast&lt;double&gt;(particles.size());
+
+    for (int n_x = -n_max; n_x &lt;= n_max; ++n_x) {
+        for (int n_y = -n_max; n_y &lt;= n_max; ++n_y) {
+            // 跳过零模，并只保留 ±k 中的一个，避免重复计数。
+            if (n_x &lt; 0 || (n_x == 0 &amp;&amp; n_y &lt;= 0)) {
+                continue;
+            }
+
+            const double k_x = k_min * static_cast&lt;double&gt;(n_x);
+            const double k_y = k_min * static_cast&lt;double&gt;(n_y);
+            const double k = std::hypot(k_x, k_y);
+            const std::size_t bin =
+                static_cast&lt;std::size_t&gt;(std::floor(k / delta_k));
+
+            if (bin &gt;= sk_sum.size() ||
+                bin &gt;= k_sum.size() ||
+                bin &gt;= sample_count.size()) {
+                continue;
+            }
+
+            std::complex&lt;double&gt; rho_k{0.0, 0.0};
+            for (const Particle&amp; particle : particles) {
+                const double phase = k_x * particle.x + k_y * particle.y;
+                rho_k += std::complex&lt;double&gt;{
+                    std::cos(phase), -std::sin(phase)
+                };
+            }
+
+            const double sk = std::norm(rho_k) * inv_n;
+            k_sum[bin] += k;
+            sk_sum[bin] += sk;
+            sample_count[bin] += 1;
+        }
+    }
+}
+</code></pre>
+<p>完成所有快照后，对每个非空分箱输出</p>
+<div class="arithmatex">\[
+k_{\mathrm{bin}}
+=\frac{k_{\mathrm{sum}}}{n_{\mathrm{bin}}},
+\qquad
+S(k_{\mathrm{bin}})
+=\frac{S_{\mathrm{sum}}}{n_{\mathrm{bin}}}.
+\]</div>
+<p>这里的 <span class="arithmatex">\(n_{\mathrm{bin}}\)</span> 同时计入壳内模式和快照。若要估计统计误差，不应把同一快照中的不同波矢或 <span class="arithmatex">\(\pm\mathbf k\)</span> 简单当作完全独立样本；更稳妥的做法是先对每个快照完成壳平均，再对快照平均并进行阻塞分析。</p>
+<h3 id="83-使用-type-1-nufft-加速">8.3 使用 Type-1 NUFFT 加速</h3>
+<p>直接求和需要对每个粒子和每个波矢计算复指数。若共有 <span class="arithmatex">\(N\)</span> 个粒子和 <span class="arithmatex">\(M\)</span> 个 Fourier 模式，其计算量为 <span class="arithmatex">\(O(NM)\)</span>。当粒子坐标是连续值、但目标波矢仍是周期盒允许的规则倒格矢时，可以使用 Type-1 非均匀快速 Fourier 变换（nonuniform fast Fourier transform, NUFFT）。</p>
+<p>定义缩放后的周期坐标</p>
+<div class="arithmatex">\[
+\mathbf x_j
+=\frac{2\pi}{L}\mathbf r_j
+\pmod{2\pi}.
+\]</div>
+<p>Type-1 NUFFT 一次计算所有整数模式</p>
+<div class="arithmatex">\[
+\rho_{\mathbf n}
+=\sum_{j=1}^{N}
+e^{-i\mathbf n\cdot\mathbf x_j},
+\qquad
+\mathbf n=(n_x,n_y),
+\]</div>
+<p>它们正好对应物理波矢</p>
+<div class="arithmatex">\[
+\mathbf k=\frac{2\pi}{L}\mathbf n.
+\]</div>
+<p>因此 NUFFT 只替换 <span class="arithmatex">\(\rho_{\mathbf k}\)</span> 的计算步骤；随后仍按</p>
+<div class="arithmatex">\[
+S(\mathbf k)=\frac{|\rho_{\mathbf k}|^2}{N}
+\]</div>
+<p>计算结构因子，并使用与直接算法完全相同的壳划分。典型 NUFFT 将粒子扩散到过采样网格，执行普通 FFT，再在 Fourier 空间去卷积。若扩散核宽度为 <span class="arithmatex">\(w\)</span>，其成本近似为</p>
+<div class="arithmatex">\[
+O(Nw^d)+O(M\log M),
+\]</div>
+<p>其中 <span class="arithmatex">\(w\)</span> 随目标精度提高而缓慢增加。</p>
+<p>下面使用 FINUFFT 的二维 Type-1 接口。<code>modeord=0</code> 指定以零模为中心的输出顺序，因此数组中心 <code>[n_max, n_max]</code> 对应 <span class="arithmatex">\(\mathbf k=0\)</span>。</p>
+<pre><code class="language-python">import finufft
+import numpy as np
+
+
+def structure_factor_nufft(
+    positions: np.ndarray,
+    box_length: float,
+    n_max: int,
+    eps: float = 1.0e-12,
+    nthreads: int = 1,
+) -&gt; np.ndarray:
+    &quot;&quot;&quot;Return S(k_x, k_y) for modes -n_max, ..., n_max.&quot;&quot;&quot;
+    positions = np.asarray(positions, dtype=np.float64)
+    if positions.ndim != 2 or positions.shape[1] != 2 or positions.shape[0] == 0:
+        raise ValueError(&quot;positions must have shape (N, 2) with N &gt; 0&quot;)
+    if box_length &lt;= 0.0 or n_max &lt; 0 or nthreads &lt; 1:
+        raise ValueError(&quot;box_length and nthreads must be positive; n_max must be nonnegative&quot;)
+    particle_count = positions.shape[0]
+
+    # FINUFFT recommends periodic coordinates in [-pi, pi).
+    scaled = 2.0 * np.pi * positions / box_length
+    scaled = (scaled + np.pi) % (2.0 * np.pi) - np.pi
+    x = np.ascontiguousarray(scaled[:, 0])
+    y = np.ascontiguousarray(scaled[:, 1])
+    strengths = np.ones(particle_count, dtype=np.complex128)
+    mode_count = 2 * n_max + 1
+
+    rho_k = finufft.nufft2d1(
+        x,
+        y,
+        strengths,
+        (mode_count, mode_count),
+        eps=eps,
+        isign=-1,
+        modeord=0,
+        nthreads=nthreads,
+    )
+    sk = np.abs(rho_k) ** 2 / particle_count
+    sk[n_max, n_max] = np.nan  # 固定粒子数下不使用零模。
+    return sk
+</code></pre>
+<p>把坐标平移到 <span class="arithmatex">\([-\pi,\pi)\)</span> 只会给 <span class="arithmatex">\(\rho_{\mathbf k}\)</span> 乘上依赖于模式的相位，不改变 <span class="arithmatex">\(|\rho_{\mathbf k}|^2\)</span>。若需要逐复数振幅比较，直接求和与 NUFFT 必须使用同一个坐标原点和 Fourier 符号。</p>
+<h4 id="与直接求和的数值对比">与直接求和的数值对比</h4>
+<p>为了比较随体系尺寸的变化，以下测试固定二维数密度 <span class="arithmatex">\(\rho=N/L^2=1\)</span>，并固定每个 Cartesian 分量的物理截止波数 <span class="arithmatex">\(k_{\max}\simeq1.42\)</span>。因此增大 <span class="arithmatex">\(N\)</span> 时有 <span class="arithmatex">\(L\propto N^{1/2}\)</span>、<span class="arithmatex">\(n_{\max}\propto L\)</span>，所需 Fourier 模式数 <span class="arithmatex">\(M=(2n_{\max}+1)^2\propto N\)</span>。这比“固定模式数”更接近在不同体系中保持同一空间分辨率的生产计算。两种算法使用同一批粒子、同一组模式和同一壳划分。</p>
+<h5 id="速度与复杂度">速度与复杂度</h5>
+<p><img loading="lazy" decoding="async" alt="固定密度、固定物理截止波数下两种算法随体系尺寸的耗时" src="../../assets/blog/structure-factor-runtime.png"></p>
+<p>直接算法采用分块 NumPy 求和，每个尺寸重复三次；FINUFFT 2.5.1 使用双精度、<code>eps=1e-12</code>、单线程，预热后重复七次。图中的点是中位数，误差棒覆盖最小值到最大值。对 <span class="arithmatex">\(N=4{,}000\)</span> 到 <span class="arithmatex">\(32{,}000\)</span> 的后四点作 log--log 拟合，直接求和为 <span class="arithmatex">\(t\propto N^{1.90}\)</span>，接近本协议下的理论标度 <span class="arithmatex">\(O(NM)\sim O(N^2)\)</span>；NUFFT 为 <span class="arithmatex">\(t\propto N^{0.82}\)</span>。后者的有限区间指数受固定开销影响，不应解释为渐近复杂度；理论成本仍近似为 <span class="arithmatex">\(O(N+M\log M)\sim O(N\log N)\)</span>。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;"><span class="arithmatex">\(N\)</span></th>
+<th style="text-align: right;">模式数 <span class="arithmatex">\(M\)</span></th>
+<th style="text-align: right;">直接求和</th>
+<th style="text-align: right;">Type-1 NUFFT</th>
+<th style="text-align: right;">加速比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1,000</td>
+<td style="text-align: right;">225</td>
+<td style="text-align: right;">8.21 ms</td>
+<td style="text-align: right;">0.357 ms</td>
+<td style="text-align: right;"><span class="arithmatex">\(23.0\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;">2,000</td>
+<td style="text-align: right;">441</td>
+<td style="text-align: right;">32.0 ms</td>
+<td style="text-align: right;">0.473 ms</td>
+<td style="text-align: right;"><span class="arithmatex">\(67.7\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;">4,000</td>
+<td style="text-align: right;">841</td>
+<td style="text-align: right;">0.123 s</td>
+<td style="text-align: right;">0.698 ms</td>
+<td style="text-align: right;"><span class="arithmatex">\(176\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;">8,000</td>
+<td style="text-align: right;">1,681</td>
+<td style="text-align: right;">0.446 s</td>
+<td style="text-align: right;">1.07 ms</td>
+<td style="text-align: right;"><span class="arithmatex">\(418\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;">16,000</td>
+<td style="text-align: right;">3,249</td>
+<td style="text-align: right;">1.69 s</td>
+<td style="text-align: right;">1.85 ms</td>
+<td style="text-align: right;"><span class="arithmatex">\(913\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;">32,000</td>
+<td style="text-align: right;">6,561</td>
+<td style="text-align: right;">6.33 s</td>
+<td style="text-align: right;">3.86 ms</td>
+<td style="text-align: right;"><span class="arithmatex">\(1.64\times10^3\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>在这个固定物理分辨率的扫描中，体系从 <span class="arithmatex">\(N=1{,}000\)</span> 增至 <span class="arithmatex">\(32{,}000\)</span> 时，直接求和耗时增加约 770 倍，而 NUFFT 只增加约 10.8 倍；相应加速比从约 23 增至约 1,641。具体耗时和交叉尺度仍依赖硬件与实现。</p>
+<h5 id="准确度">准确度</h5>
+<p>准确度不能用“NUFFT 与直接求和之差”完全定义，因为这会预先把直接求和当作精确答案。下面改用单位间距的完美方格点阵作为解析基准。对于图中选取的全部非零模式，波数都低于第一组倒格矢峰，因而精确结果是 <span class="arithmatex">\(S(\mathbf k)=0\)</span>。纵轴画的是全部非零模式中的最大绝对误差；数值越低，算法越准确。</p>
+<p><img loading="lazy" decoding="async" alt="两种算法相对于完美方格点阵解析零谱的误差" src="../../assets/blog/structure-factor-accuracy.png"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;"><span class="arithmatex">\(N\)</span></th>
+<th style="text-align: right;">直接求和最大 <span class="arithmatex">\(\lvert\Delta S(\mathbf k)\rvert\)</span></th>
+<th style="text-align: right;">NUFFT 最大 <span class="arithmatex">\(\lvert\Delta S(\mathbf k)\rvert\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1,024</td>
+<td style="text-align: right;"><span class="arithmatex">\(8.38\times10^{-29}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(1.30\times10^{-23}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;">2,025</td>
+<td style="text-align: right;"><span class="arithmatex">\(2.42\times10^{-28}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(5.25\times10^{-23}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;">4,096</td>
+<td style="text-align: right;"><span class="arithmatex">\(2.88\times10^{-28}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(5.20\times10^{-23}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;">8,281</td>
+<td style="text-align: right;"><span class="arithmatex">\(9.71\times10^{-27}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(2.72\times10^{-23}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;">16,384</td>
+<td style="text-align: right;"><span class="arithmatex">\(3.99\times10^{-26}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(2.09\times10^{-22}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;">32,761</td>
+<td style="text-align: right;"><span class="arithmatex">\(1.13\times10^{-25}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(1.62\times10^{-21}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>在这个严格的解析零信号测试中，直接求和的残差比 <code>eps=1e-12</code> 的 NUFFT 小约四至六个数量级；这是 NUFFT 以可控近似换取速度的体现。尽管误差随体系尺寸有波动并总体增大，即使在最大体系中，NUFFT 的最大伪结构因子仍只有 <span class="arithmatex">\(1.62\times10^{-21}\)</span>。对于随机点体系，两种算法的最大壳平均差始终低于 <span class="arithmatex">\(8.0\times10^{-12}\)</span>，全部尺寸中的最大壳平均 RMS 相对差为 <span class="arithmatex">\(6.9\times10^{-13}\)</span>。</p>
+<p>精度随 FINUFFT 容差的收敛如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;"><code>eps</code></th>
+<th style="text-align: right;">最大逐模 <span class="arithmatex">\(\lvert\Delta S(\mathbf k)\rvert\)</span></th>
+<th style="text-align: right;">最大壳平均 <span class="arithmatex">\(\lvert\Delta S(k)\rvert\)</span></th>
+<th style="text-align: right;">壳平均 RMS 相对差</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;"><span class="arithmatex">\(10^{-6}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(7.88\times10^{-6}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(4.16\times10^{-7}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(1.23\times10^{-7}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;"><span class="arithmatex">\(10^{-8}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(1.72\times10^{-8}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(1.78\times10^{-9}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(4.65\times10^{-10}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;"><span class="arithmatex">\(10^{-10}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(5.09\times10^{-10}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(4.71\times10^{-11}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(1.56\times10^{-11}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: right;"><span class="arithmatex">\(10^{-12}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(7.90\times10^{-12}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(6.81\times10^{-13}\)</span></td>
+<td style="text-align: right;"><span class="arithmatex">\(1.24\times10^{-13}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><code>eps</code> 控制的是 Fourier 变换误差，不保证超均匀指数的统计误差或有限尺寸误差。生产计算中应采用以下验证门槛：</p>
+<ol>
+<li>使用双精度和 <code>eps=1e-12</code> 计算完整谱。</li>
+<li>对进入小 <span class="arithmatex">\(k\)</span> 拟合的最低若干壳，用直接求和逐模复核。</li>
+<li>比较至少 <code>eps=1e-8, 1e-10, 1e-12</code> 三档结果，要求壳平均和拟合指数在目标误差内不再变化。</li>
+<li>独立改变系统尺寸、快照间隔和拟合窗口；NUFFT 收敛不能替代这些物理与统计收敛检查。</li>
+</ol>
+<p>普通“粒子沉积到网格再 FFT”还会引入质量分配窗函数和 aliasing。高阶粒子分配、交错网格和去卷积可以显著减小这些误差，但若目标是连续粒子坐标上的高精度 <span class="arithmatex">\(S(\mathbf k)\)</span>，Type-1 NUFFT 提供了更直接、容差可控的路径。</p>
+<h3 id="84-有限尺寸与拟合注意事项">8.4 有限尺寸与拟合注意事项</h3>
+<ol>
+<li>最小非零波数是 <span class="arithmatex">\(k_{\min}=2\pi/L\)</span>。判断 <span class="arithmatex">\(k\to0\)</span> 标度必须比较多个系统尺寸。</li>
+<li>不要把固定粒子数导致的 <span class="arithmatex">\(S(0)=0\)</span> 纳入幂律拟合。</li>
+<li>拟合区间应同时避开有限尺寸区和粒子尺度附近的高波数区。</li>
+<li>应报告分箱宽度、每个壳的模式数、快照间隔、样本数和误差估计。</li>
+<li>若 <span class="arithmatex">\(S(\mathbf k)\)</span> 显示明显角向结构，应报告二维谱，而不是只展示径向平均。</li>
+</ol>
+<h2 id="附录d-维球形窗口的形状因子">附录：<span class="arithmatex">\(d\)</span> 维球形窗口的形状因子</h2>
+<p>对半径为 <span class="arithmatex">\(R\)</span> 的 <span class="arithmatex">\(d\)</span> 维球形窗口，令 <span class="arithmatex">\(q=kR\)</span>。归一化形状因子为</p>
+<div class="arithmatex">\[
+F_d(q)
+=\frac{|\widetilde w_R(k)|^2}{V_R^2}
+=\left[
+\frac{2^{d/2}\Gamma(1+d/2)}{q^{d/2}}
+J_{d/2}(q)
+\right]^2,
+\]</div>
+<p>其中 <span class="arithmatex">\(J_{\nu}\)</span> 是第一类 Bessel 函数。前三个维数分别为</p>
+<div class="arithmatex">\[
+F_1(q)=\left(\frac{\sin q}{q}\right)^2,
+\]</div>
+<div class="arithmatex">\[
+F_2(q)=\left(\frac{2J_1(q)}{q}\right)^2,
+\]</div>
+<div class="arithmatex">\[
+F_3(q)=\left[
+\frac{3(\sin q-q\cos q)}{q^3}
+\right]^2.
+\]</div>
+<p>在大 <span class="arithmatex">\(q\)</span> 下，其振荡包络满足 <span class="arithmatex">\(F_d(q)\sim q^{-(d+1)}\)</span>。正是这一慢衰减使 <span class="arithmatex">\(\alpha\ge1\)</span> 时窗口边界控制粒子数方差的主导标度。</p>
+<h2 id="参考资料">参考资料</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/cond-mat/0311532">Torquato and Stillinger, <em>Local Density Fluctuations, Hyperuniformity, and Order Metrics</em></a></li>
+<li><a href="https://arxiv.org/abs/cond-mat/0409594">Gabrielli, <em>Point processes and stochastic displacement fields</em></a></li>
+<li><a href="https://arxiv.org/abs/1407.0146">Hexner and Levine, <em>Hyperuniformity of critical absorbing states</em></a></li>
+<li><a href="https://arxiv.org/abs/2310.17391">Ma, Pausch, and Cates, <em>Theory of Hyperuniformity at the Absorbing State Transition</em></a></li>
+<li><a href="https://arxiv.org/abs/2507.07793">Ma, Pausch, Pruessner, and Cates, <em>Hyperuniformity at the Absorbing State Transition: Perturbative RG for Random Organization</em></a></li>
+<li><a href="https://arxiv.org/abs/2203.08749">Hawat et al., <em>On estimating the structure factor of a point process, with applications to hyperuniformity</em></a></li>
+<li><a href="https://arxiv.org/abs/1808.06736">Barnett, Magland, and af Klinteberg, <em>A parallel non-uniform fast Fourier transform library based on an exponential of semicircle kernel</em></a></li>
+<li><a href="https://arxiv.org/abs/2001.09405">Barnett, <em>Aliasing error of the exponential-of-semicircle kernel in the nonuniform fast Fourier transform</em></a></li>
+<li><a href="https://arxiv.org/abs/1512.07295">Sefusatti et al., <em>Accurate Estimators of Correlation Functions in Fourier Space</em></a></li>
+</ul>
+                </div>
+            </div>
+
+            <footer class="article-footer">
+                <a href="../../#blog">← 返回博客</a>
+                <a href="https://github.com/xixi-cc/xixi-cc.github.io">查看主页源码</a>
+            </footer>
+        </article>
+    </main>
+</body>
+</html>

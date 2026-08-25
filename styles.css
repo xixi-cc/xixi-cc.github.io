@@ -145,6 +145,26 @@ p { margin: 0 0 16px; }
 .blog-empty strong { color: var(--text); }
 .blog-empty p { margin: 6px 0 0; }
 
+.blog-list article {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 26px;
+    padding: 22px 0;
+}
+
+.blog-list time {
+    color: var(--muted);
+    font-size: .875rem;
+}
+
+.blog-list h3 { font-size: 1.15rem; }
+
+.blog-list p {
+    max-width: 900px;
+    margin: 8px 0 0;
+    color: var(--muted);
+}
+
 footer {
     display: flex;
     justify-content: space-between;
@@ -179,12 +199,14 @@ footer {
     .collection-list article,
     .education-list article,
     .project-list article,
-    .skill-list > div { grid-template-columns: 1fr; }
+    .skill-list > div,
+    .blog-list article { grid-template-columns: 1fr; }
 
     .collection-list article { gap: 4px; }
     .education-list article,
     .project-list article,
-    .skill-list > div { gap: 6px; }
+    .skill-list > div,
+    .blog-list article { gap: 6px; }
     footer { flex-direction: column; gap: 4px; }
 }
 
