@@ -1,4 +1,16 @@
-.article-page { background: #fafafa; }
+@font-face {
+    font-family: "STIX Two Math Web";
+    src: url("assets/fonts/stix-two-math.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+.article-page {
+    --blog-text: "Roboto Web", Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    --latex-math: "STIX Two Math Web", "STIX Two Math", "Cambria Math", serif;
+    background: var(--background);
+}
 
 .article-shell {
     width: min(1400px, calc(100% - 64px));
@@ -8,82 +20,81 @@
 .blog-article { width: 100%; }
 
 .article-header {
-    max-width: 960px;
-    margin: 0 auto 46px;
-    padding-bottom: 28px;
+    max-width: 1040px;
+    margin: 0 auto 32px;
+    padding-bottom: 24px;
     border-bottom: 1px solid var(--line);
 }
 
 .article-kicker {
     margin-bottom: 12px;
     color: var(--muted);
-    font-size: .8rem;
+    font-size: 14px;
     letter-spacing: .08em;
 }
 
 .article-header h1 {
-    margin-bottom: 18px;
-    font-size: clamp(2rem, 5vw, 3.2rem);
+    max-width: 1000px;
+    margin-bottom: 14px;
+    font-family: var(--blog-text);
+    font-size: clamp(30px, 3vw, 38px);
+    font-weight: 300;
 }
 
 .article-meta {
     margin: 0;
     color: var(--muted);
-    font-size: .85rem;
+    font-size: 14px;
 }
 
 .article-layout {
-    display: grid;
-    grid-template-columns: 250px minmax(0, 900px);
-    justify-content: center;
-    align-items: start;
-    gap: 64px;
-}
-
-.article-toc {
-    position: sticky;
-    top: 96px;
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
-    padding-right: 20px;
-    font-size: .72rem;
-}
-
-.article-toc strong {
     display: block;
-    margin-bottom: 10px;
-    color: var(--text);
-    font-size: .78rem;
 }
 
-.article-toc .toc > ul,
-.mobile-toc .toc > ul {
+.article-outline .toc > ul {
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-.article-toc .toc ul ul,
-.mobile-toc .toc ul ul {
+.article-outline .toc ul ul {
     margin: 5px 0 0;
     padding-left: 15px;
 }
 
-.article-toc li { margin: 0 0 8px; }
-.article-toc a { color: var(--muted); }
-.article-toc a:hover { color: var(--accent); }
-.mobile-toc { display: none; }
+.article-outline {
+    max-width: 1040px;
+    margin: 0 auto 42px;
+    padding: 13px 18px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: #f7f7f7;
+    font-size: 14px;
+}
+
+.article-outline summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.article-outline .toc { margin-top: 14px; }
+.article-outline li { margin: 0 0 7px; }
+.article-outline a { color: var(--muted); }
+.article-outline a:hover { color: var(--accent); }
 
 .article-content {
+    max-width: 1040px;
+    margin-inline: auto;
     min-width: 0;
-    font-family: Georgia, "Times New Roman", "Songti SC", SimSun, serif;
-    font-size: .95rem;
-    line-height: 1.78;
+    font-family: var(--blog-text);
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.42;
 }
 
 .article-content > p:first-child {
     color: #404040;
-    font-size: 1.08rem;
+    font-size: 1em;
 }
 
 .article-content h2,
@@ -91,31 +102,34 @@
 .article-content h4,
 .article-content h5 {
     scroll-margin-top: 100px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+    font-family: var(--blog-text);
+    font-weight: 300;
 }
 
 .article-content h2 {
-    margin: 58px 0 24px;
-    font-size: 1.65rem;
+    margin: 42px 0 16px;
+    font-size: 23px;
 }
 
 .article-content h3 {
-    margin: 42px 0 18px;
-    font-size: 1.2rem;
+    margin: 32px 0 14px;
+    font-size: 19px;
 }
 
 .article-content h4 {
     margin: 34px 0 16px;
-    font-size: 1.05rem;
+    font-size: 16px;
 }
 
 .article-content h5 {
     margin: 28px 0 14px;
-    font-size: .95rem;
+    font-size: 15px;
 }
 
 .article-content p,
-.article-content li { max-width: 78ch; }
+.article-content li { max-width: none; }
+
+.article-content p { margin-bottom: 12px; }
 
 .article-content ul,
 .article-content ol { padding-left: 1.5em; }
@@ -157,7 +171,7 @@
     margin: 24px 0 30px;
     overflow-x: auto;
     border-collapse: collapse;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft YaHei", sans-serif;
+    font-family: var(--blog-text);
     font-size: .76rem;
     white-space: nowrap;
 }
@@ -174,13 +188,53 @@
     font-weight: 600;
 }
 
-.article-content mjx-container[display="true"] {
+.article-content math[display="block"] {
+    display: block;
+    width: fit-content;
     max-width: 100%;
-    margin: 1.5em 0 !important;
+    margin: 1em auto;
     overflow-x: auto;
     overflow-y: hidden;
     padding: 3px 0;
+    text-align: center;
 }
+
+.article-header math,
+.article-content math {
+    font-family: var(--latex-math);
+    font-size: .96em;
+}
+
+.article-header mjx-container,
+.article-content mjx-container {
+    font-size: .96em;
+}
+
+.article-content mjx-container[display="true"] {
+    max-width: 100%;
+    margin: 1em auto !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    text-align: center;
+}
+
+.article-content .equation-number {
+    margin: -1.15em 0 1em;
+    color: var(--muted);
+    font-size: .82em;
+    text-align: right;
+    scroll-margin-top: 100px;
+}
+
+.article-content blockquote {
+    margin: 22px 0;
+    padding: 11px 16px;
+    border-left: 3px solid var(--accent);
+    background: #f7f7f7;
+    color: #404040;
+}
+
+.article-content blockquote p:last-child { margin-bottom: 0; }
 
 .article-content hr {
     margin: 50px 0;
@@ -191,38 +245,11 @@
 .article-footer {
     display: flex;
     justify-content: space-between;
-    max-width: 900px;
+    max-width: 1040px;
     margin: 64px auto 0;
     padding-top: 24px;
     border-top: 1px solid var(--line);
     font-size: .82rem;
-}
-
-@media (max-width: 980px) {
-    .article-layout { display: block; }
-    .article-toc { display: none; }
-
-    .mobile-toc {
-        display: block;
-        max-width: 900px;
-        margin: 0 auto 34px;
-        padding: 14px 18px;
-        border: 1px solid var(--line);
-        background: #fff;
-        font-size: .8rem;
-    }
-
-    .mobile-toc summary {
-        cursor: pointer;
-        font-weight: 600;
-    }
-
-    .mobile-toc .toc { margin-top: 14px; }
-
-    .article-content {
-        max-width: 900px;
-        margin-inline: auto;
-    }
 }
 
 @media (max-width: 620px) {
@@ -231,17 +258,22 @@
         padding-top: 34px;
     }
 
-    .article-header { margin-bottom: 28px; }
-    .article-header h1 { font-size: 2rem; }
+    .article-header { margin-bottom: 24px; }
+    .article-header h1 { font-size: 28px; }
+
+    .article-outline {
+        margin-bottom: 30px;
+        padding: 12px 14px;
+    }
 
     .article-content {
-        font-size: 1rem;
-        line-height: 1.72;
+        font-size: 14px;
+        line-height: 1.42;
     }
 
     .article-content h2 {
-        margin-top: 46px;
-        font-size: 1.55rem;
+        margin-top: 36px;
+        font-size: 20px;
     }
 
     .article-content pre {
@@ -254,4 +286,35 @@
         flex-direction: column;
         gap: 10px;
     }
+}
+@font-face {
+    font-family: "Roboto Web";
+    src: url("assets/fonts/roboto-300.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Roboto Web";
+    src: url("assets/fonts/roboto-400.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Roboto Web";
+    src: url("assets/fonts/roboto-500.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Roboto Web";
+    src: url("assets/fonts/roboto-700.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
 }

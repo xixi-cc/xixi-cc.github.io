@@ -10,11 +10,17 @@ python3 -m http.server 8000
 
 Open <http://localhost:8000/>. Changes pushed to `main` are published by GitHub Pages.
 
-## Rebuild the blog article
+## Rebuild the blog articles
 
 ```bash
 uv run --with-requirements requirements-blog.txt python scripts/build_blog.py
 ```
 
-The editable source is `content/structure-factor.md`; the generated page is
-`blog/structure-factor/index.html`.
+Editable sources live under `content/`; generated pages live under `blog/<slug>/`.
+The MSRJD note is reproducibly derived from the curated LaTeX source before the
+site build:
+
+```bash
+python3 scripts/convert_msr_tex.py
+uv run --with-requirements requirements-blog.txt python scripts/build_blog.py
+```

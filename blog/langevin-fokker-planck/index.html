@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>从一般 Langevin 方程到 Fokker–Planck 方程 · 曹溪能</title>
+    <meta name="description" content="从 Itô 随机微分方程出发，用生成元与短时传播核两条路线推导 Fokker–Planck 方程，并讨论 Stratonovich 约定。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://xixi-cc.github.io/blog/langevin-fokker-planck/">
+    <meta property="og:title" content="从一般 Langevin 方程到 Fokker–Planck 方程">
+    <meta property="og:description" content="从 Itô 随机微分方程出发，用生成元与短时传播核两条路线推导 Fokker–Planck 方程，并讨论 Stratonovich 约定。">
+    <meta property="article:published_time" content="2026-08-28">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="从一般 Langevin 方程到 Fokker–Planck 方程">
+    <meta name="twitter:description" content="从 Itô 随机微分方程出发，用生成元与短时传播核两条路线推导 Fokker–Planck 方程，并讨论 Stratonovich 约定。">
+    <link rel="canonical" href="https://xixi-cc.github.io/blog/langevin-fokker-planck/">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../blog.css">
+    <script>
+        window.MathJax = {
+            chtml: {fontURL: '../../assets/mathjax/output/chtml/fonts/woff-v2'},
+            options: {enableMenu: false}
+        };
+    </script>
+    <script defer src="../../assets/mathjax/tex-mml-chtml.js"></script>
+</head>
+<body class="article-page">
+    <header class="topbar">
+        <nav aria-label="主导航">
+            <a href="../../">主页</a>
+            <a href="../../#reading">论文追踪</a>
+            <a href="../../#blog" aria-current="page">博客</a>
+        </nav>
+    </header>
+
+    <main class="article-shell">
+        <article class="blog-article">
+            <header class="article-header">
+                <p class="article-kicker"><a href="../../#blog">研究笔记</a></p>
+                <h1>从一般 Langevin 方程到 Fokker–Planck 方程</h1>
+                <p class="article-meta"><time datetime="2026-08-28">2026 年 8 月 28 日</time> · 随机过程</p>
+            </header>
+
+            <details class="article-outline">
+                <summary>文章目录</summary>
+                <div class="toc">
+<ul>
+<li><a href="#1-itô-公式与-delta-函数表示">1. Itô 公式与 Delta 函数表示</a><ul>
+<li><a href="#11-概率密度的微观表示">1.1 概率密度的微观表示</a></li>
+<li><a href="#12-对微观密度使用-itô-公式">1.2 对微观密度使用 Itô 公式</a></li>
+<li><a href="#13-取平均并进行分部积分">1.3 取平均并进行分部积分</a></li>
+</ul>
+</li>
+<li><a href="#2-chapmankolmogorov-方程与-kramersmoyal-展开">2. Chapman–Kolmogorov 方程与 Kramers–Moyal 展开</a><ul>
+<li><a href="#21-短时增量">2.1 短时增量</a></li>
+<li><a href="#22-条件矩与-kramersmoyal-系数">2.2 条件矩与 Kramers–Moyal 系数</a></li>
+<li><a href="#23-概率密度的演化">2.3 概率密度的演化</a></li>
+</ul>
+</li>
+<li><a href="#3-itô-与-stratonovich-解释">3. Itô 与 Stratonovich 解释</a></li>
+<li><a href="#4-概率流边界条件与归一化">4. 概率流、边界条件与归一化</a></li>
+<li><a href="#5-两个极限检验">5. 两个极限检验</a></li>
+<li><a href="#6-多维推广">6. 多维推广</a></li>
+<li><a href="#7-结论与适用范围">7. 结论与适用范围</a></li>
+</ul>
+</div>
+
+            </details>
+
+            <div class="article-layout">
+                <div class="article-content">
+                    <p>Langevin 方程含有白噪声时，<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mover><mi>X</mi><mo>&#x002D9;</mo></mover><mo>&#x0003D;</mo><mi>a</mi><mo>&#x0002B;</mo><mi>b</mi><mi>&#x003BE;</mi></mrow></math> 只是形式写法。严格的起点应当是随机微分方程（SDE），并且必须指明随机积分的解释。本文先处理一维 Itô 扩散</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="normal">d</mi><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><mi mathvariant="normal">d</mi><mi>t</mi><mo>&#x0002B;</mo><mi>b</mi><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>t</mi></msub><mo>&#x0002C;</mo></mrow></math>
+
+<p>其中 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>W</mi><mi>t</mi></msub></mrow></math> 是标准 Wiener 过程，</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>t</mi></msub><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mn>0</mn><mo>&#x0002C;</mo><mspace width="2em" /><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mo stretchy="false">&#x00028;</mo><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>t</mi></msub><msup><mo stretchy="false">&#x00029;</mo><mn>2</mn></msup><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mi mathvariant="normal">d</mi><mi>t</mi><mo>&#x0002E;</mo></mrow></math>
+
+<p>形式上可以写成 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003BE;</mi><mo stretchy="false">&#x00028;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>t</mi></msub><mo>&#x0002F;</mo><mi mathvariant="normal">d</mi><mi>t</mi></mrow></math>，但白噪声 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003BE;</mi></mrow></math> 是广义随机过程，不能按普通时间函数处理。在系数具有足够正则性、SDE 存在适定解且 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>X</mi><mi>t</mi></msub></mrow></math> 具有概率密度 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo></mrow></math> 的条件下，对应的 Fokker–Planck 方程为</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><menclose notation="box"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mo>&#x02212;</mo><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">[</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">]</mo><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mfrac><mrow><msup><mo>&#x02202;</mo><mn>2</mn></msup></mrow><mrow><mo>&#x02202;</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">[</mo><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">]</mo><mo>&#x0002E;</mo></mrow></menclose></mrow></math>
+
+<p>下面给出两种等价的推导。第一种从 Itô 公式出发；第二种通过短时转移矩和 Kramers–Moyal 展开得到同一结果。</p>
+<hr>
+<h2 id="1-itô-公式与-delta-函数表示">1. Itô 公式与 Delta 函数表示</h2>
+<h3 id="11-概率密度的微观表示">1.1 概率密度的微观表示</h3>
+<p>定义单条随机轨道对密度的贡献</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>&#x003C1;</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mi>&#x003B4;</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x02212;</mo><msub><mi>X</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo><mo>&#x0002E;</mo></mrow></math>
+
+<p>对所有噪声实现取系综平均，得到</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi>&#x003C1;</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi>&#x003B4;</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x02212;</mo><msub><mi>X</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo><mo stretchy="false">]</mo><mo>&#x0002E;</mo></mrow></math>
+
+<h3 id="12-对微观密度使用-itô-公式">1.2 对微观密度使用 Itô 公式</h3>
+<p>由于 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>X</mi><mi>t</mi></msub></mrow></math> 的二次变差不为零，这一步不能使用普通链式法则。将 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003C1;</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mi>&#x003B4;</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x02212;</mo><msub><mi>X</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo></mrow></math> 视为 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>X</mi><mi>t</mi></msub></mrow></math> 的函数，形式地应用 Itô 公式，</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mrow><mi mathvariant="normal">d</mi><mi>&#x003C1;</mi><mi>&</mi><mo>&#x0003D;</mo><mo>&#x02212;</mo><mfrac><mrow><mo>&#x02202;</mo><mi>&#x003C1;</mi></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mspace width="0.167em" /><mi mathvariant="normal">d</mi><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mfrac><mrow><msup><mo>&#x02202;</mo><mn>2</mn></msup><mi>&#x003C1;</mi></mrow><mrow><mo>&#x02202;</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo stretchy="false">&#x00028;</mo><mi mathvariant="normal">d</mi><msub><mi>X</mi><mi>t</mi></msub><msup><mo stretchy="false">&#x00029;</mo><mn>2</mn></msup><mspace linebreak="newline" /><mi>&</mi><mo>&#x0003D;</mo><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><mo>&#x02212;</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mfrac><mrow><mo>&#x02202;</mo><mi>&#x003C1;</mi></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mfrac><mrow><msup><mo>&#x02202;</mo><mn>2</mn></msup><mi>&#x003C1;</mi></mrow><mrow><mo>&#x02202;</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><mi mathvariant="normal">d</mi><mi>t</mi><mo>&#x02212;</mo><mi>b</mi><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mfrac><mrow><mo>&#x02202;</mo><mi>&#x003C1;</mi></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mspace width="0.167em" /><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>t</mi></msub><mo>&#x0002E;</mo></mrow></mrow></math>
+
+<p>这里使用了 Itô 乘法表</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo stretchy="false">&#x00028;</mo><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>t</mi></msub><msup><mo stretchy="false">&#x00029;</mo><mn>2</mn></msup><mo>&#x0003D;</mo><mi mathvariant="normal">d</mi><mi>t</mi><mo>&#x0002C;</mo><mspace width="2em" /><mi mathvariant="normal">d</mi><mi>t</mi><mspace width="0.167em" /><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mn>0</mn><mo>&#x0002C;</mo><mspace width="2em" /><mo stretchy="false">&#x00028;</mo><mi mathvariant="normal">d</mi><mi>t</mi><msup><mo stretchy="false">&#x00029;</mo><mn>2</mn></msup><mo>&#x0003D;</mo><mn>0</mn><mo>&#x0002E;</mo></mrow></math>
+
+<p>上述 Delta 函数计算应当按分布理解。等价的严格做法是先对任意光滑测试函数 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003C6;</mi><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo></mrow></math> 应用 Itô 公式，再对 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>x</mi></mrow></math> 分部积分。</p>
+<h3 id="13-取平均并进行分部积分">1.3 取平均并进行分部积分</h3>
+<p>在 Itô 解释下，最后一项是 Itô 随机积分。若相应的可积性条件成立，其期望为零。因此</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mo>&#x02212;</mo><mi mathvariant="double-struck">E</mi><mspace width="negativethinmathspace" /><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mi>&#x003B4;</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x02212;</mo><msub><mi>X</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mi mathvariant="double-struck">E</mi><mspace width="negativethinmathspace" /><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mfrac><mrow><msup><mo>&#x02202;</mo><mn>2</mn></msup></mrow><mrow><mo>&#x02202;</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mi>&#x003B4;</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x02212;</mo><msub><mi>X</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><mo>&#x0002E;</mo></mrow></math>
+
+<p>利用分布恒等式</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="double-struck">E</mi><mspace width="negativethinmathspace" /><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><mi>F</mi><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>&#x003B4;</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x02212;</mo><msub><mi>X</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><mo>&#x0003D;</mo><mi>F</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002C;</mo></mrow></math>
+
+<p>并将对 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>x</mi></mrow></math> 的导数移到整个乘积上，得到</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mo>&#x02212;</mo><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">[</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">]</mo><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mfrac><mrow><msup><mo>&#x02202;</mo><mn>2</mn></msup></mrow><mrow><mo>&#x02202;</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">[</mo><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">]</mo><mo>&#x0002E;</mo></mrow></math>
+
+<p>关键的二阶导数来自 Itô 二次变差 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo stretchy="false">&#x00028;</mo><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>t</mi></msub><msup><mo stretchy="false">&#x00029;</mo><mn>2</mn></msup><mo>&#x0003D;</mo><mi mathvariant="normal">d</mi><mi>t</mi></mrow></math>，而不是普通链式法则之后再额外补入的噪声平均。</p>
+<hr>
+<h2 id="2-chapmankolmogorov-方程与-kramersmoyal-展开">2. Chapman–Kolmogorov 方程与 Kramers–Moyal 展开</h2>
+<h3 id="21-短时增量">2.1 短时增量</h3>
+<p>在条件 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mi>x</mi></mrow></math> 下，小时间步 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi></mrow></math> 内的 Itô 增量为</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>X</mi><mo>&#x0003D;</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi><mo>&#x0002B;</mo><mi>b</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>W</mi><mo>&#x0002B;</mo><msub><mi>o</mi><mrow><mi mathvariant="normal">p</mi></mrow></msub><mo stretchy="false">&#x00028;</mo><msqrt><mrow><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi></mrow></msqrt><mo stretchy="false">&#x00029;</mo><mo>&#x0002C;</mo></mrow></math>
+
+<p>其中 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>W</mi><mi>&#x0007E;</mi><mi mathvariant="script">N</mi><mo stretchy="false">&#x00028;</mo><mn>0</mn><mo>&#x0002C;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi><mo stretchy="false">&#x00029;</mo></mrow></math>。在 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>b</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x02260;</mo><mn>0</mn></mrow></math> 的非退化点，短时转移核在领头阶上是高斯的：</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>P</mi><mo stretchy="false">&#x00028;</mo><msup><mi>x</mi><mi>&#x02032;</mi></msup><mo>&#x0002C;</mo><mi>t</mi><mo>&#x0002B;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi><mo>&#x02223;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x02243;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msqrt><mrow><mn>2</mn><mi>&#x003C0;</mi><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi></mrow></msqrt></mrow></mfrac><mi>exp</mi><mspace width="negativethinmathspace" /><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><mo>&#x02212;</mo><mfrac><mrow><mo stretchy="false">[</mo><msup><mi>x</mi><mi>&#x02032;</mi></msup><mo>&#x02212;</mo><mi>x</mi><mo>&#x02212;</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi><msup><mo stretchy="false">]</mo><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><mo>&#x0002E;</mo></mrow></math>
+
+<p>当 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>a</mi></mrow></math> 或 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>b</mi></mrow></math> 依赖于状态时，这只是冻结短时系数得到的渐近转移核，不是有限 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi></mrow></math> 下的精确解。</p>
+<h3 id="22-条件矩与-kramersmoyal-系数">2.2 条件矩与 Kramers–Moyal 系数</h3>
+<p>定义</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>D</mi><mrow><mo stretchy="false">&#x00028;</mo><mi>n</mi><mo stretchy="false">&#x00029;</mo></mrow></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>n</mi><mo>&#x00021;</mo></mrow></mfrac><msub><mo>lim</mo><mrow><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi><mo>&#x02192;</mo><mn>0</mn></mrow></msub><mfrac><mrow><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mo stretchy="false">&#x00028;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>X</mi><msup><mo stretchy="false">&#x00029;</mo><mi>n</mi></msup><mo>&#x02223;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mi>x</mi><mo stretchy="false">]</mo></mrow><mrow><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi></mrow></mfrac><mo>&#x0002E;</mo></mrow></math>
+
+<p>利用 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>W</mi><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mn>0</mn></mrow></math> 和 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mo stretchy="false">&#x00028;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>W</mi><msup><mo stretchy="false">&#x00029;</mo><mn>2</mn></msup><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi></mrow></math>，可得</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>D</mi><mrow><mo stretchy="false">&#x00028;</mo><mn>1</mn><mo stretchy="false">&#x00029;</mo></mrow></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002C;</mo><mspace width="2em" /><msup><mi>D</mi><mrow><mo stretchy="false">&#x00028;</mo><mn>2</mn><mo stretchy="false">&#x00029;</mo></mrow></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002E;</mo></mrow></math>
+
+<p>对 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>n</mi><mo>&#x02265;</mo><mn>3</mn></mrow></math>，高阶条件矩本身在有限 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi></mrow></math> 下并非都等于零；正确的说法是</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mo stretchy="false">&#x00028;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>X</mi><msup><mo stretchy="false">&#x00029;</mo><mi>n</mi></msup><mo>&#x02223;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mi>x</mi><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mi>o</mi><mo stretchy="false">&#x00028;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002C;</mo></mrow></math>
+
+<p>因而它们对应的 Kramers–Moyal 系数 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msup><mi>D</mi><mrow><mo stretchy="false">&#x00028;</mo><mi>n</mi><mo stretchy="false">&#x00029;</mo></mrow></msup></mrow></math> 为零。</p>
+<h3 id="23-概率密度的演化">2.3 概率密度的演化</h3>
+<p>Chapman–Kolmogorov 方程给出</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>p</mi><mo stretchy="false">&#x00028;</mo><msup><mi>x</mi><mi>&#x02032;</mi></msup><mo>&#x0002C;</mo><mi>t</mi><mo>&#x0002B;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><msubsup><mo>&#x0222B;</mo><mrow><mo>&#x02212;</mo><mo>&#x0221E;</mo></mrow><mrow><mo>&#x0221E;</mo></mrow></msubsup><mi>P</mi><mo stretchy="false">&#x00028;</mo><msup><mi>x</mi><mi>&#x02032;</mi></msup><mo>&#x0002C;</mo><mi>t</mi><mo>&#x0002B;</mo><mi>&#x1D49F;</mi><mi>e</mi><mi>l</mi><mi>t</mi><mi>a</mi><mi>t</mi><mo>&#x02223;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><mi mathvariant="normal">d</mi><mi>x</mi><mo>&#x0002E;</mo></mrow></math>
+
+<p>将短时转移矩代入 Kramers–Moyal 展开，</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><munderover><mo>&#x02211;</mo><mrow><mi>n</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mo>&#x0221E;</mo></mrow></munderover><msup><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mo>&#x02212;</mo><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mi>n</mi></msup><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">[</mo><msup><mi>D</mi><mrow><mo stretchy="false">&#x00028;</mo><mi>n</mi><mo stretchy="false">&#x00029;</mo></mrow></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">]</mo><mo>&#x0002E;</mo></mrow></math>
+
+<p>对连续高斯扩散，只有 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msup><mi>D</mi><mrow><mo stretchy="false">&#x00028;</mo><mn>1</mn><mo stretchy="false">&#x00029;</mo></mrow></msup></mrow></math> 和 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msup><mi>D</mi><mrow><mo stretchy="false">&#x00028;</mo><mn>2</mn><mo stretchy="false">&#x00029;</mo></mrow></msup></mrow></math> 存活，所以</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><menclose notation="box"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mo>&#x02212;</mo><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">[</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">]</mo><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mfrac><mrow><msup><mo>&#x02202;</mo><mn>2</mn></msup></mrow><mrow><mo>&#x02202;</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">[</mo><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">]</mo><mo>&#x0002E;</mo></mrow></menclose></mrow></math>
+
+<hr>
+<h2 id="3-itô-与-stratonovich-解释">3. Itô 与 Stratonovich 解释</h2>
+<p>对加性噪声（<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>b</mi></mrow></math> 与 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>x</mi></mrow></math> 无关），Itô 与 Stratonovich 解释给出相同的 Fokker–Planck 方程。对乘性噪声，两者的漂移项不同。若 Langevin 方程以 Stratonovich 形式给出，</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="normal">d</mi><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0003D;</mo><msub><mi>a</mi><mrow><mi mathvariant="normal">S</mi></mrow></msub><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><mi mathvariant="normal">d</mi><mi>t</mi><mo>&#x0002B;</mo><mi>b</mi><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x02218;</mo><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>t</mi></msub><mo>&#x0002C;</mo></mrow></math>
+
+<p>则等价的 Itô 漂移为</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>a</mi><mrow><mi mathvariant="normal">I</mi></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><msub><mi>a</mi><mrow><mi mathvariant="normal">S</mi></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mi>b</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mfrac><mrow><mo>&#x02202;</mo><mi>b</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo>&#x0002E;</mo></mrow></math>
+
+<p>因此对应的 Fokker–Planck 方程是</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mo>&#x02212;</mo><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><msub><mi>a</mi><mrow><mi mathvariant="normal">S</mi></mrow></msub><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mi>b</mi><mspace width="0.167em" /><msub><mo>&#x02202;</mo><mi>x</mi></msub><mi>b</mi><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mi>p</mi><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mfrac><mrow><msup><mo>&#x02202;</mo><mn>2</mn></msup></mrow><mrow><mo>&#x02202;</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo stretchy="false">&#x00028;</mo><msup><mi>b</mi><mn>2</mn></msup><mi>p</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002E;</mo></mrow></math>
+
+<p>它也可以写成</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mo>&#x02212;</mo><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo stretchy="false">&#x00028;</mo><msub><mi>a</mi><mrow><mi mathvariant="normal">S</mi></mrow></msub><mi>p</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><mi>b</mi><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo stretchy="false">&#x00028;</mo><mi>b</mi><mi>p</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><mo>&#x0002E;</mo></mrow></math>
+
+<p>因此，只写 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mover><mi>X</mi><mo>&#x002D9;</mo></mover><mo>&#x0003D;</mo><mi>a</mi><mo>&#x0002B;</mo><mi>b</mi><mi>&#x003BE;</mi></mrow></math> 而不指定随机积分解释，并不足以唯一确定乘性噪声下的 Fokker–Planck 方程。</p>
+<hr>
+<h2 id="4-概率流边界条件与归一化">4. 概率流、边界条件与归一化</h2>
+<p>定义 Itô 扩散的概率流</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>J</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x02212;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">[</mo><msup><mi>b</mi><mn>2</mn></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" minsize="1.2em" maxsize="1.2em">]</mo><mo>&#x0002C;</mo></mrow></math>
+
+<p>则 Fokker–Planck 方程具有连续性方程的形式</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mo>&#x02212;</mo><mfrac><mrow><mo>&#x02202;</mo><mi>J</mi></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo>&#x0002E;</mo></mrow></math>
+
+<p>在无穷区间上，若 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>J</mi><mo stretchy="false">&#x00028;</mo><mi>&#x000B1;</mi><mo>&#x0221E;</mo><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mn>0</mn></mrow></math>；或在有限区间上采用无流边界条件，则</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mi mathvariant="normal">d</mi></mrow><mrow><mi mathvariant="normal">d</mi><mi>t</mi></mrow></mfrac><mo>&#x0222B;</mo><mi>p</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><mi mathvariant="normal">d</mi><mi>x</mi><mo>&#x0003D;</mo><mn>0</mn><mo>&#x0002C;</mo></mrow></math>
+
+<p>所以概率归一化得以保持。吸收边界则允许概率通过边界流出所考察的状态区域。</p>
+<hr>
+<h2 id="5-两个极限检验">5. 两个极限检验</h2>
+<ul>
+<li>当 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>b</mi><mo>&#x0003D;</mo><mn>0</mn></mrow></math> 时，方程化为</li>
+</ul>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mo>&#x02212;</mo><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo stretchy="false">&#x00028;</mo><mi>a</mi><mi>p</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002C;</mo></mrow></math>
+
+<p>即确定性动力学 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mover><mi>X</mi><mo>&#x002D9;</mo></mover><mo>&#x0003D;</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><mi>X</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo></mrow></math> 对应的 Liouville 连续性方程。</p>
+<ul>
+<li>当 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>a</mi><mo>&#x0003D;</mo><mn>0</mn></mrow></math> 且 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>b</mi><mo>&#x0003D;</mo><msqrt><mrow><mn>2</mn><mi>D</mi></mrow></msqrt></mrow></math> 为常数时，方程化为</li>
+</ul>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mi>D</mi><mfrac><mrow><msup><mo>&#x02202;</mo><mn>2</mn></msup><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo>&#x0002C;</mo></mrow></math>
+
+<p>即普通扩散方程。这一极限也检验了二阶项中的因子 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>1</mn><mo>&#x0002F;</mo><mn>2</mn></mrow></math>。</p>
+<hr>
+<h2 id="6-多维推广">6. 多维推广</h2>
+<p>对 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>d</mi></mrow></math> 维 Itô 扩散（<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>i</mi><mo>&#x0002C;</mo><mi>j</mi><mo>&#x0003D;</mo><mn>1</mn><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo>&#x0002C;</mo><mi>d</mi></mrow></math>）</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="normal">d</mi><msub><mi>X</mi><mi>i</mi></msub><mo>&#x0003D;</mo><msub><mi>a</mi><mi>i</mi></msub><mo stretchy="false">&#x00028;</mo><mi mathvariant="bold-italic">X</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><mi mathvariant="normal">d</mi><mi>t</mi><mo>&#x0002B;</mo><munderover><mo>&#x02211;</mo><mrow><mi>&#x003B1;</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mi>m</mi></mrow></munderover><msub><mi>B</mi><mrow><mi>i</mi><mi>&#x003B1;</mi></mrow></msub><mo stretchy="false">&#x00028;</mo><mi mathvariant="bold-italic">X</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>&#x003B1;</mi></msub><mo>&#x0002C;</mo></mrow></math>
+
+<p>其中</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>&#x003B1;</mi></msub><mspace width="0.167em" /><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>&#x003B2;</mi></msub><mo stretchy="false">]</mo><mo>&#x0003D;</mo><msub><mi>&#x003B4;</mi><mrow><mi>&#x003B1;</mi><mi>&#x003B2;</mi></mrow></msub><mspace width="0.167em" /><mi mathvariant="normal">d</mi><mi>t</mi><mo>&#x0002C;</mo></mrow></math>
+
+<p>定义扩散矩阵</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>D</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false">&#x00028;</mo><mi mathvariant="bold-italic">x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><munderover><mo>&#x02211;</mo><mrow><mi>&#x003B1;</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mi>m</mi></mrow></munderover><msub><mi>B</mi><mrow><mi>i</mi><mi>&#x003B1;</mi></mrow></msub><mo stretchy="false">&#x00028;</mo><mi mathvariant="bold-italic">x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><msub><mi>B</mi><mrow><mi>j</mi><mi>&#x003B1;</mi></mrow></msub><mo stretchy="false">&#x00028;</mo><mi mathvariant="bold-italic">x</mi><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002E;</mo></mrow></math>
+
+<p>则 Fokker–Planck 方程为</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><menclose notation="box"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mo>&#x02212;</mo><msub><mo>&#x02211;</mo><mi>i</mi></msub><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><msub><mi>x</mi><mi>i</mi></msub></mrow></mfrac><mo stretchy="false">&#x00028;</mo><msub><mi>a</mi><mi>i</mi></msub><mi>p</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><msub><mo>&#x02211;</mo><mrow><mi>i</mi><mo>&#x0002C;</mo><mi>j</mi></mrow></msub><mfrac><mrow><msup><mo>&#x02202;</mo><mn>2</mn></msup></mrow><mrow><mo>&#x02202;</mo><msub><mi>x</mi><mi>i</mi></msub><mo>&#x02202;</mo><msub><mi>x</mi><mi>j</mi></msub></mrow></mfrac><mo stretchy="false">&#x00028;</mo><msub><mi>D</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>p</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002E;</mo></mrow></menclose></mrow></math>
+
+<p>这是有限维连续 Itô 扩散的一般形式，但仍不是所有随机动力学的“最一般”形式。含跳跃的 Markov 过程需要主方程中的非局域转移项；有色噪声通常需要扩大状态空间或采用近似闭合；非 Markov 过程也不一定满足局域的 Fokker–Planck 方程。</p>
+<hr>
+<h2 id="7-结论与适用范围">7. 结论与适用范围</h2>
+<p>从一维 Itô SDE</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="normal">d</mi><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0003D;</mo><mi>a</mi><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><mi mathvariant="normal">d</mi><mi>t</mi><mo>&#x0002B;</mo><mi>b</mi><mo stretchy="false">&#x00028;</mo><msub><mi>X</mi><mi>t</mi></msub><mo>&#x0002C;</mo><mi>t</mi><mo stretchy="false">&#x00029;</mo><mspace width="0.167em" /><mi mathvariant="normal">d</mi><msub><mi>W</mi><mi>t</mi></msub></mrow></math>
+
+<p>出发，可以通过 Itô 公式或 Kramers–Moyal 展开得到</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>p</mi></mrow><mrow><mo>&#x02202;</mo><mi>t</mi></mrow></mfrac><mo>&#x0003D;</mo><mo>&#x02212;</mo><mfrac><mrow><mo>&#x02202;</mo></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo stretchy="false">&#x00028;</mo><mi>a</mi><mi>p</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002B;</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mfrac><mrow><msup><mo>&#x02202;</mo><mn>2</mn></msup></mrow><mrow><mo>&#x02202;</mo><msup><mi>x</mi><mn>2</mn></msup></mrow></mfrac><mo stretchy="false">&#x00028;</mo><msup><mi>b</mi><mn>2</mn></msup><mi>p</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002E;</mo></mrow></math>
+
+<p>这一结论依赖于三个关键前提：过程是 Markov 的连续扩散；噪声是 Wiener 白噪声；已明确指定 Itô 或与之等价的随机积分解释。对乘性噪声，改变随机积分解释会改变有效漂移，不能省略这一约定。</p>
+                </div>
+            </div>
+
+            <footer class="article-footer">
+                <a href="../../#blog">← 返回博客</a>
+                <a href="https://github.com/xixi-cc/xixi-cc.github.io">查看主页源码</a>
+            </footer>
+        </article>
+    </main>
+</body>
+</html>

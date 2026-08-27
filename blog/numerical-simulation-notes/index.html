@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>C/C++ 数值模拟注意点 · 曹溪能</title>
+    <meta name="description" content="面向 C/C++ 科学计算的简明检查表：内存布局、并行、随机数、浮点精度、I/O 与可复现性。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://xixi-cc.github.io/blog/numerical-simulation-notes/">
+    <meta property="og:title" content="C/C++ 数值模拟注意点">
+    <meta property="og:description" content="面向 C/C++ 科学计算的简明检查表：内存布局、并行、随机数、浮点精度、I/O 与可复现性。">
+    <meta property="article:published_time" content="2026-08-28">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="C/C++ 数值模拟注意点">
+    <meta name="twitter:description" content="面向 C/C++ 科学计算的简明检查表：内存布局、并行、随机数、浮点精度、I/O 与可复现性。">
+    <link rel="canonical" href="https://xixi-cc.github.io/blog/numerical-simulation-notes/">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../blog.css">
+    <script>
+        window.MathJax = {
+            chtml: {fontURL: '../../assets/mathjax/output/chtml/fonts/woff-v2'},
+            options: {enableMenu: false}
+        };
+    </script>
+    <script defer src="../../assets/mathjax/tex-mml-chtml.js"></script>
+</head>
+<body class="article-page">
+    <header class="topbar">
+        <nav aria-label="主导航">
+            <a href="../../">主页</a>
+            <a href="../../#reading">论文追踪</a>
+            <a href="../../#blog" aria-current="page">博客</a>
+        </nav>
+    </header>
+
+    <main class="article-shell">
+        <article class="blog-article">
+            <header class="article-header">
+                <p class="article-kicker"><a href="../../#blog">研究笔记</a></p>
+                <h1>C/C++ 数值模拟注意点</h1>
+                <p class="article-meta"><time datetime="2026-08-28">2026 年 8 月 28 日</time> · 数值方法</p>
+            </header>
+
+            <details class="article-outline">
+                <summary>文章目录</summary>
+                <div class="toc">
+<ul>
+<li><a href="#参考">参考</a></li>
+</ul>
+</div>
+
+            </details>
+
+            <div class="article-layout">
+                <div class="article-content">
+                    <p>优化前先保证结果正确，再用性能分析工具定位瓶颈。每次只改一项，便于判断收益和回退。</p>
+<ol>
+<li><strong>数据对齐</strong></li>
+</ol>
+<p>需要 SIMD 或避免伪共享时，可使用标准 C++ 的 <code>alignas(bytes)</code>。对齐和填充过多也会浪费内存，应通过测试决定。</p>
+<ol start="2">
+<li><strong>连续内存</strong></li>
+</ol>
+<p>规则数组尽量使用连续存储，并使循环顺序与存储顺序一致，以提高缓存命中率。二维数据可用一维 <code>std::vector&lt;T&gt;</code> 存储。</p>
+<ol start="3">
+<li><strong>内存分配</strong></li>
+</ol>
+<p>先减少热循环中的反复分配，例如预留容量和复用缓冲区。只有确认分配器是瓶颈时，才考虑其他内存池或分配器。</p>
+<ol start="4">
+<li><strong>矩阵计算</strong></li>
+</ol>
+<p>大矩阵运算可使用分块提高缓存利用率。Strassen 算法只适合经过基准测试和误差检查的特定大规模问题，不是默认选择。</p>
+<ol start="5">
+<li><strong>数学库</strong></li>
+</ol>
+<p>矩阵乘法、分解和线性方程求解应优先使用经过优化的 BLAS/LAPACK 库。同时检查库内部线程是否与外层并行重叠。</p>
+<ol start="6">
+<li><strong>SIMD 向量化</strong></li>
+</ol>
+<p>先尝试编译器自动向量化，再考虑 SSE/AVX intrinsic。手写 SIMD 需要处理 CPU 支持、数据对齐、尾部元素和可移植性。</p>
+<ol start="7">
+<li><strong>循环优化</strong></li>
+</ol>
+<p>将不随循环变化的计算移到循环外，并避免在热循环中分配内存或重复调用高开销函数。</p>
+<ol start="8">
+<li><strong>编译优化</strong></li>
+</ol>
+<p>通常先比较 <code>-O2</code> 和 <code>-O3</code>。<code>-Ofast</code> 可能改变浮点语义，只有在数值误差和性能都经过验证后才使用。</p>
+<ol start="9">
+<li><strong>多线程并行</strong></li>
+</ol>
+<p>可使用 C++ 线程、TBB 或 OpenMP 并行处理独立任务。需要检查数据竞争、同步开销、伪共享和浮点求和顺序的变化。</p>
+<ol start="10">
+<li>
+<p><strong>任务划分</strong></p>
+<p>任务应尽量负载均衡，同时保证单个任务足够大，避免调度开销超过并行收益。</p>
+</li>
+<li>
+<p><strong>性能分析</strong></p>
+<p>使用 <code>perf</code>、gprof、Cachegrind 或 Intel VTune 定位热点。Valgrind Memcheck 和 sanitizer 主要用于检查正确性，不应用它们的运行时间作为正常性能结果。</p>
+</li>
+<li>
+<p><strong>优化后验证</strong></p>
+<p>每次优化后都要复测墙钟时间，并检查误差、守恒量、统计分布和收敛趋势。只有结果正确且稳定加速时，才能保留改动。</p>
+</li>
+</ol>
+<h2 id="参考">参考</h2>
+<p><a href="https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html">GCC 优化选项</a> · <a href="https://www.openmp.org/spec-html/5.2/openmpse66.html">OpenMP 循环调度</a> · <a href="https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html">Intel Intrinsics Guide</a> · <a href="https://valgrind.org/docs/manual/cg-manual.html">Valgrind Cachegrind</a></p>
+                </div>
+            </div>
+
+            <footer class="article-footer">
+                <a href="../../#blog">← 返回博客</a>
+                <a href="https://github.com/xixi-cc/xixi-cc.github.io">查看主页源码</a>
+            </footer>
+        </article>
+    </main>
+</body>
+</html>
