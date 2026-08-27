@@ -19,6 +19,11 @@ body {
     line-height: 1.5;
 }
 
+.home-page {
+    font-size: 17px;
+    line-height: 1.42;
+}
+
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
@@ -41,6 +46,12 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
     font-size: 1rem;
 }
 
+.home-page .topbar nav {
+    gap: 22px;
+    padding: 13px 0;
+    font-size: .94em;
+}
+
 .topbar a { color: var(--text); }
 
 main,
@@ -49,9 +60,9 @@ footer {
     margin-inline: auto;
 }
 
-main { padding: 64px 0 72px; }
-section { padding: 30px 0; }
-section + section { margin-top: 10px; }
+main { padding: 52px 0 62px; }
+section { padding: 24px 0; }
+section + section { margin-top: 6px; }
 
 .about {
     display: flow-root;
@@ -75,8 +86,8 @@ section + section { margin-top: 10px; }
 .contact-list p { margin-bottom: 6px; }
 
 h1 {
-    margin: 0 0 28px;
-    font-size: 2.5rem;
+    margin: 0 0 22px;
+    font-size: 2.25em;
     font-weight: 400;
     line-height: 1.2;
     letter-spacing: -.025em;
@@ -86,21 +97,21 @@ h1 strong { font-weight: 700; }
 h1 span { font-size: .5em; font-weight: 400; white-space: nowrap; }
 
 h2 {
-    margin: 0 0 22px;
-    padding-bottom: 7px;
+    margin: 0 0 17px;
+    padding-bottom: 6px;
     border-bottom: 1px solid var(--line);
-    font-size: 2rem;
+    font-size: 1.55em;
     font-weight: 500;
     line-height: 1.3;
 }
 
 h3 {
     margin: 0 0 6px;
-    font-size: 1rem;
+    font-size: 1em;
     font-weight: 700;
 }
 
-p { margin: 0 0 16px; }
+p { margin: 0 0 12px; }
 
 .education-list article,
 .project-list article,
@@ -108,7 +119,7 @@ p { margin: 0 0 16px; }
     display: grid;
     grid-template-columns: 180px minmax(0, 1fr);
     gap: 26px;
-    padding: 18px 0;
+    padding: 14px 0;
 }
 
 .education-list article + article,
@@ -119,7 +130,7 @@ p { margin: 0 0 16px; }
 .project-meta,
 .skill-list dt {
     color: var(--muted);
-    font-size: .875rem;
+    font-size: .875em;
 }
 
 .education-list p,
@@ -133,13 +144,13 @@ p { margin: 0 0 16px; }
     display: grid;
     grid-template-columns: minmax(260px, .8fr) minmax(0, 1.7fr);
     gap: 44px;
-    padding: 24px 0;
+    padding: 18px 0;
 }
 
 .collection-list article + article { border-top: 1px solid var(--line); }
 .collection-list p { margin: 0; color: var(--muted); }
-.collection-meta { color: var(--muted); font-size: .875rem; }
-.section-intro { max-width: 900px; margin-bottom: 14px; color: var(--muted); }
+.collection-meta { color: var(--muted); font-size: .875em; }
+.section-intro { max-width: 900px; margin-bottom: 10px; color: var(--muted); }
 
 .blog-empty { padding: 22px 0; color: var(--muted); }
 .blog-empty strong { color: var(--text); }
@@ -149,19 +160,19 @@ p { margin: 0 0 16px; }
     display: grid;
     grid-template-columns: 180px minmax(0, 1fr);
     gap: 26px;
-    padding: 22px 0;
+    padding: 17px 0;
 }
 
 .blog-list time {
     color: var(--muted);
-    font-size: .875rem;
+    font-size: .875em;
 }
 
-.blog-list h3 { font-size: 1.15rem; }
+.blog-list h3 { font-size: 1.05em; }
 
 .blog-list p {
     max-width: 900px;
-    margin: 8px 0 0;
+    margin: 6px 0 0;
     color: var(--muted);
 }
 
@@ -177,6 +188,7 @@ footer {
 
 @media (max-width: 620px) {
     html { font-size: 16px; }
+    .home-page { font-size: 15px; }
 
     .topbar nav {
         justify-content: flex-start;
