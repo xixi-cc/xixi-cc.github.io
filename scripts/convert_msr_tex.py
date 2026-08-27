@@ -113,7 +113,7 @@ def convert() -> str:
     lines = source_lines[body_start:]
 
     output = [
-        "# Martin–Siggia–Rose 形式主义：从 Langevin 方程到动力学路径积分",
+        "# Martin–Siggia–Rose formalism",
         "",
     ]
     equation_number = 0

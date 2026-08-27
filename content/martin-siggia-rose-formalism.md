@@ -1,4 +1,4 @@
-# Martin–Siggia–Rose 形式主义：从 Langevin 方程到动力学路径积分
+# Martin–Siggia–Rose formalism
 
 本文从一般 Langevin 方程出发，将噪声平均改写为关于原变量和响应场的函数积分。推导依次使用运动方程的泛函数 Delta 约束、Delta 泛函数的 Fourier 表示以及高斯噪声积分，得到 Martin–Siggia–Rose/Janssen–De Dominicis（MSRJD）动作量。文末用 Ornstein–Uhlenbeck 过程显式计算生成泛函数、二点相关函数和线性响应函数。
 
