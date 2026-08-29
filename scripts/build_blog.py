@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import html
+import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -219,6 +220,27 @@ def render_article(article: Article) -> None:
         )
         twitter_card = "summary_large_image"
 
+    structured_data = json.dumps(
+        {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": plain_title,
+            "description": article.description,
+            "datePublished": article.published,
+            "dateModified": article.published,
+            "inLanguage": "zh-CN",
+            "url": canonical,
+            "mainEntityOfPage": canonical,
+            "author": {
+                "@type": "Person",
+                "name": "Xineng Cao",
+                "alternateName": ["Xixi Cao", "曹溪能"],
+                "url": "https://xixi-cc.github.io/",
+            },
+        },
+        ensure_ascii=False,
+    )
+
     document = f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -235,6 +257,7 @@ def render_article(article: Article) -> None:
     <meta name="twitter:title" content="{html.escape(plain_title)}">
     <meta name="twitter:description" content="{html.escape(social_description)}">
     <link rel="canonical" href="{canonical}">
+    <script type="application/ld+json">{structured_data}</script>
     <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../../styles.css">
     <link rel="stylesheet" href="../../blog.css">
@@ -291,6 +314,26 @@ def render_article(article: Article) -> None:
 def main() -> None:
     for article in ARTICLES:
         render_article(article)
+    sitemap_entries = [
+        ("https://xixi-cc.github.io/", "2026-08-29"),
+        ("https://xixi-cc.github.io/rights.html", "2026-08-29"),
+        *[(f"https://xixi-cc.github.io/blog/{article.slug}/", article.published) for article in ARTICLES],
+    ]
+    sitemap = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for url, last_modified in sitemap_entries:
+        sitemap.extend(
+            [
+                "  <url>",
+                f"    <loc>{html.escape(url)}</loc>",
+                f"    <lastmod>{last_modified}</lastmod>",
+                "  </url>",
+            ]
+        )
+    sitemap.append("</urlset>")
+    (ROOT / "sitemap.xml").write_text("\n".join(sitemap) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
