@@ -276,6 +276,7 @@ def render_article(article: Article) -> None:
 
             <footer class="article-footer">
                 <a href="../../#blog">← 返回博客</a>
+                <a href="../../rights.html">版权与引用</a>
                 <a href="https://github.com/xixi-cc/xixi-cc.github.io">查看主页源码</a>
             </footer>
         </article>

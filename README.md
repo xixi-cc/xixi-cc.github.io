@@ -2,6 +2,13 @@
 
 Personal academic homepage for Xixi Cao, published at <https://xixi-cc.github.io/>.
 
+## License and citation
+
+Original editorial content is available under CC BY-NC 4.0, while original
+site code is available under MIT. Third-party materials are excluded. See
+[LICENSE.md](LICENSE.md) for scope and [CITATION.md](CITATION.md) or
+[CITATION.cff](CITATION.cff) for the preferred attribution format.
+
 ## Local preview
 
 ```bash
