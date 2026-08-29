@@ -304,6 +304,9 @@ def render_article(article: Article) -> None:
             </footer>
         </article>
     </main>
+    <!-- Cloudflare Web Analytics -->
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token":"73522e5dee9b42b0be84b4847e4dd502"}}'></script>
+    <!-- End Cloudflare Web Analytics -->
 </body>
 </html>
 """
