@@ -35,6 +35,15 @@ class Article:
 
 ARTICLES = (
     Article(
+        slug="harnessvla-to-zetta",
+        source="harnessvla-to-zetta.md",
+        description="近期我学习并复现了 HarnessVLA 和 Zetta。",
+        published="2026-09-06",
+        published_zh="2026 年 9 月 6 日",
+        category="具身智能",
+        image="assets/blog/harnessvla-to-zetta/harnessvla_system_overview.png",
+    ),
+    Article(
         slug="martin-siggia-rose-formalism",
         source="martin-siggia-rose-formalism.md",
         description="从 Langevin 方程出发，经泛函数 Delta 约束、响应场和高斯噪声积分，推导 MSRJD 动作量，并以 OU 过程检验相关与响应。",
@@ -206,6 +215,11 @@ def render_article(article: Article) -> None:
         }
         for old, new in replacements.items():
             body = body.replace(old, new)
+    if article.slug == "harnessvla-to-zetta":
+        body = body.replace(
+            'src="assets/',
+            'src="../../assets/blog/harnessvla-to-zetta/',
+        )
     body = body.replace("<img ", '<img loading="lazy" decoding="async" ')
 
     canonical = f"https://xixi-cc.github.io/blog/{article.slug}/"

@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>从 HarnessVLA 到 Zetta · 曹溪能</title>
+    <meta name="description" content="近期我学习并复现了 HarnessVLA 和 Zetta。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://xixi-cc.github.io/blog/harnessvla-to-zetta/">
+    <meta property="og:title" content="从 HarnessVLA 到 Zetta">
+    <meta property="og:description" content="近期我学习并复现了 HarnessVLA 和 Zetta。">
+    <meta property="og:image" content="https://xixi-cc.github.io/assets/blog/harnessvla-to-zetta/harnessvla_system_overview.png">
+    <meta name="twitter:image" content="https://xixi-cc.github.io/assets/blog/harnessvla-to-zetta/harnessvla_system_overview.png">
+    <meta property="article:published_time" content="2026-09-06">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="从 HarnessVLA 到 Zetta">
+    <meta name="twitter:description" content="近期我学习并复现了 HarnessVLA 和 Zetta。">
+    <link rel="canonical" href="https://xixi-cc.github.io/blog/harnessvla-to-zetta/">
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "从 HarnessVLA 到 Zetta", "description": "近期我学习并复现了 HarnessVLA 和 Zetta。", "datePublished": "2026-09-06", "dateModified": "2026-09-06", "inLanguage": "zh-CN", "url": "https://xixi-cc.github.io/blog/harnessvla-to-zetta/", "mainEntityOfPage": "https://xixi-cc.github.io/blog/harnessvla-to-zetta/", "author": {"@type": "Person", "name": "Xineng Cao", "alternateName": ["Xixi Cao", "曹溪能"], "url": "https://xixi-cc.github.io/"}}</script>
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../blog.css">
+    <script>
+        window.MathJax = {
+            chtml: {fontURL: '../../assets/mathjax/output/chtml/fonts/woff-v2'},
+            options: {enableMenu: false}
+        };
+    </script>
+    <script defer src="../../assets/mathjax/tex-mml-chtml.js"></script>
+</head>
+<body class="article-page">
+    <header class="topbar">
+        <nav aria-label="主导航">
+            <a href="../../">主页</a>
+            <a href="../../#reading">论文追踪</a>
+            <a href="../../#blog" aria-current="page">博客</a>
+        </nav>
+    </header>
+
+    <main class="article-shell">
+        <article class="blog-article">
+            <header class="article-header">
+                <p class="article-kicker"><a href="../../#blog">研究笔记</a></p>
+                <h1>从 HarnessVLA 到 Zetta</h1>
+                <p class="article-meta"><time datetime="2026-09-06">2026 年 9 月 6 日</time> · 具身智能</p>
+            </header>
+
+            <details class="article-outline">
+                <summary>文章目录</summary>
+                <div class="toc">
+<ul>
+<li><a href="#说明">说明</a></li>
+<li><a href="#1-研究动机">1 研究动机</a></li>
+<li><a href="#2-harnessvlaepisode-内的分层控制">2 HarnessVLA：episode 内的分层控制</a><ul>
+<li><a href="#21-核心架构">2.1 核心架构</a></li>
+<li><a href="#22-规划与执行的进一步解耦">2.2 规划与执行的进一步解耦</a></li>
+<li><a href="#23-实验结果">2.3 实验结果</a></li>
+</ul>
+</li>
+<li><a href="#3-zetta跨-episode-的-harness-更新">3 Zetta：跨 episode 的 harness 更新</a><ul>
+<li><a href="#31-自进化的对象">3.1 自进化的对象</a></li>
+<li><a href="#32-顿悟与泛化">3.2 顿悟与泛化</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+            </details>
+
+            <div class="article-layout">
+                <div class="article-content">
+                    <p class="article-subtitle">冻结 VLA 的分层控制、失败恢复与闭环自进化</p>
+
+<p class="article-byline">曹溪能　2026 年 9 月</p>
+
+<h2 id="说明">说明</h2>
+<p>近期我学习并复现了 <a href="https://arxiv.org/abs/2607.08448">HarnessVLA</a> 和 <a href="https://arxiv.org/abs/2608.16590">Zetta</a>。具体工作包括：梳理 HarnessVLA 的分层控制框架，在此基础上重新组织规划与执行模块并进行对照实验；随后复现 Zetta 的 harness 自进化流程。本文集中记录两套架构的核心机制、值得关注的现象及本地实验结果。</p>
+<h2 id="1-研究动机">1　研究动机</h2>
+<p>VLA在语义理解，长时稳定性和泛化性上现在做的比较差，而基于llm的agent在这些方面都做得比较好，因此自然的想法就是将两者结合起来。由agent去规划，判断，由VLA去执行。</p>
+<h2 id="2-harnessvlaepisode-内的分层控制">2　HarnessVLA：episode 内的分层控制</h2>
+<h3 id="21-核心架构">2.1　核心架构</h3>
+<p>VLA 被封装为处理接触动作的 <span class="smallcaps">vla_act</span>；定位、移动、旋转、夹爪和释放由解析原语完成。Task Specific Memory 保存当前任务的成功示例，Global Memory 存放通用规则和失败模型。planner 负责选择原语及其调用时机。</p>
+<figure>
+  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/harnessvla_system_overview.png" alt="HarnessVLA 官方系统总览">
+  <figcaption>图 1　HarnessVLA 官方系统总览：语义规划、记忆、冻结 VLA 与解析原语的分工。</figcaption>
+</figure>
+
+<figure>
+  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/harnessvla_primitive_composition.png" alt="Primitive composition">
+  <figcaption>图 2　Primitive composition：解析控制负责 staging，VLA 负责接触丰富阶段。</figcaption>
+</figure>
+
+<p>论文报告的标准 LIBERO 成绩是 384/400（96.0%），同一冻结 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003C0;</mi><mrow><mn>0.5</mn></mrow></msub></mrow></math> checkpoint 的直接基线是 95.3%。在分布偏移更强的任务上，LIBERO-Pro 的 Codex 与 CC 版本分别为 72.1% 和 82.4%，RoboCasa365 为 57.1%，RoboTwin C2R 为 58.4%。</p>
+<h3 id="22-规划与执行的进一步解耦">2.2　规划与执行的进一步解耦</h3>
+<p>但是在复现过程中，我发现harnessvla的耗时特别久，超过2/3的时间都是agent推理消耗掉了，因为每执行一段primitive，就执行一次agent推理。</p>
+<p>但是很多primitive，比如<code>move_to</code>,都是很简单且确定性的primitive。因此我做了一个简单的优化：“每执行一段primitive，就执行一次agent推理”换成“每执行一串primitive，就执行一次agent推理”。并且做了仿真测试</p>
+<figure class="figure-compact">
+  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/event_loop.png" alt="我采用的分层闭环">
+  <figcaption>图 3　我采用的分层闭环：短计划，单步执行，逐步反馈。</figcaption>
+</figure>
+
+<h3 id="23-实验结果">2.3　实验结果</h3>
+<p>实验覆盖四个 LIBERO suite，每个 suite 包含 24 个 episode（表 1）。</p>
+<p class="table-caption">表 1　原始架构与分层架构在四个 LIBERO suite 上的结果。</p>
+
+<table>
+<thead>
+<tr>
+<th>架构</th>
+<th style="text-align: right;">LIBERO-Spatial</th>
+<th style="text-align: right;">LIBERO-Object</th>
+<th style="text-align: right;">LIBERO-Goal</th>
+<th style="text-align: right;">LIBERO-10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原始架构</td>
+<td style="text-align: right;">20/24（83%）</td>
+<td style="text-align: right;">24/24（100%）</td>
+<td style="text-align: right;">18/24（75%）</td>
+<td style="text-align: right;">18/24（75%）</td>
+</tr>
+<tr>
+<td>新架构</td>
+<td style="text-align: right;">21/24（88%）</td>
+<td style="text-align: right;">24/24（100%）</td>
+<td style="text-align: right;">15/24（63%）</td>
+<td style="text-align: right;">10/24（42%）</td>
+</tr>
+</tbody>
+</table>
+<p>新架构的平均 episode、成功 episode 和视频时长分别减少 32.8%、42.5% 和 46.4%（表 2）。</p>
+<p class="table-caption">表 2　96 个 episode 的总体成功率与时间统计。</p>
+
+<table>
+<thead>
+<tr>
+<th>架构</th>
+<th style="text-align: right;">成功率</th>
+<th style="text-align: right;">episode 平均耗时</th>
+<th style="text-align: right;">成功 episode 平均耗时</th>
+<th style="text-align: right;">平均视频时长</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原始架构</td>
+<td style="text-align: right;">80/96（83.3%）</td>
+<td style="text-align: right;">286.0 s</td>
+<td style="text-align: right;">222.1 s</td>
+<td style="text-align: right;">23.7 s</td>
+</tr>
+<tr>
+<td>新架构</td>
+<td style="text-align: right;">70/96（72.9%）</td>
+<td style="text-align: right;">192.3 s</td>
+<td style="text-align: right;">127.8 s</td>
+<td style="text-align: right;">12.7 s</td>
+</tr>
+</tbody>
+</table>
+<p class="table-caption">表 3　按 planner 模型拆分的 72-episode 子集。</p>
+
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>架构</th>
+<th style="text-align: right;">成功率</th>
+<th style="text-align: right;">episode 平均耗时</th>
+<th style="text-align: right;">成功 episode 平均耗时</th>
+<th style="text-align: right;">平均视频时长</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sol</td>
+<td>原始架构</td>
+<td style="text-align: right;">22/24（92%）</td>
+<td style="text-align: right;">326.2 s</td>
+<td style="text-align: right;">303.2 s</td>
+<td style="text-align: right;">25.2 s</td>
+</tr>
+<tr>
+<td>Sol</td>
+<td>新架构</td>
+<td style="text-align: right;">21/24（88%）</td>
+<td style="text-align: right;">212.3 s</td>
+<td style="text-align: right;">200.0 s</td>
+<td style="text-align: right;">12.9 s</td>
+</tr>
+<tr>
+<td>Terra</td>
+<td>原始架构</td>
+<td style="text-align: right;">18/24（75%）</td>
+<td style="text-align: right;">295.1 s</td>
+<td style="text-align: right;">247.0 s</td>
+<td style="text-align: right;">24.6 s</td>
+</tr>
+<tr>
+<td>Terra</td>
+<td>新架构</td>
+<td style="text-align: right;">15/24（63%）</td>
+<td style="text-align: right;">201.6 s</td>
+<td style="text-align: right;">188.4 s</td>
+<td style="text-align: right;">12.6 s</td>
+</tr>
+<tr>
+<td>Luna</td>
+<td>原始架构</td>
+<td style="text-align: right;">12/24（50%）</td>
+<td style="text-align: right;">234.5 s</td>
+<td style="text-align: right;">221.3 s</td>
+<td style="text-align: right;">16.2 s</td>
+</tr>
+<tr>
+<td>Luna</td>
+<td>新架构</td>
+<td style="text-align: right;">5/24（20%）</td>
+<td style="text-align: right;">192.1 s</td>
+<td style="text-align: right;">127.4 s</td>
+<td style="text-align: right;">10.24 s</td>
+</tr>
+</tbody>
+</table>
+<p>这些数据反映出明确的架构取舍：短计划和逐步反馈降低了执行耗时，同时提高了系统对 planner 判断能力的依赖。不同 suite 和不同模型之间的差异与这一机制一致。</p>
+<p>可以看到新架构确实比旧架构要耗时更短，但是代价是需要更强的模型去保持成功率不降低。</p>
+<p>然后我注意到了“zetta”这篇文章，他实现了自进化的harness，在成功率和推理速度上都比harnessvla要强很多，因此我的兴趣转向了zetta，而不是继续在harnessvla上做一些小改进了。</p>
+<h2 id="3-zetta跨-episode-的-harness-更新">3　Zetta：跨 episode 的 harness 更新</h2>
+<h3 id="31-自进化的对象">3.1　自进化的对象</h3>
+<p>Zetta 同样冻结 VLA，更新对象是外层 harness：</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="script">H</mi><mo>&#x0003D;</mo><mo stretchy="false">&#x0007B;</mo><mi>C</mi><mo>&#x0002C;</mo><mi>R</mi><mo>&#x0002C;</mo><mi mathvariant="script">T</mi><mo stretchy="false">&#x0007D;</mo><mo>&#x0002C;</mo></mrow></math>
+
+<p>其中 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>C</mi></mrow></math> 是 critic，<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>R</mi></mrow></math> 是 recovery playbook，<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi mathvariant="script">T</mi></mrow></math> 是工具集。整个更新有三层：</p>
+<ol>
+<li>每个动作后运行 critic，必要时触发 recovery；</li>
+<li>每批轨迹结束后聚类失败、诊断原因并生成候选修复；</li>
+<li>每轮只把能在新场景中复现的修复写回 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi mathvariant="script">H</mi></mrow></math>。</li>
+</ol>
+<figure>
+  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/zetta_agent_framework.png" alt="Zetta 官方框架">
+  <figcaption>图 4　Zetta 官方框架：在线执行，以及轨迹聚类、诊断、修复与 harness 合并。</figcaption>
+</figure>
+
+<p>Zetta 首先判断问题位于评价、状态估计、规划还是恢复层，再生成局部修改。候选修复先在已有轨迹上回放，再进入环境测试，并在新场景中验证。只有通过全部检查的修改才会并入正式 harness。因此，这里的“自进化”是验证门控的 code update，而不是无约束的自然语言反思。</p>
+<h3 id="32-顿悟与泛化">3.2　顿悟与泛化</h3>
+<p>论文中，LIBERO-Pro 的成功率随迭代由 34.5% 提升至 90.8%，RoboCasa 由 73.6% 提升至 93.6%；agent inference latency 相对 RPent 降低 91%。</p>
+<figure>
+  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/zetta_aha_cases.png" alt="Zetta 官方 Aha cases">
+  <figcaption>图 5　Zetta 官方 Aha cases：关键物理状态变量被修复后，成功率发生突跃。</figcaption>
+</figure>
+
+<p>有趣的是，发现自进化有一个“顿悟”的现象，这和llm中的“grokking”很像：加入 grasp-retention critic 后，成功率由 15% 升至 95%；补充 contact–grasp–retention recovery 后，由 10% 升至 60%；修正接近物体的几何关系后，则由 5% 升至 90%。论文将其称为 Aha moment。VLA 并未突然获得新的动作能力；harness 只是识别并修复了控制终局成败的关键状态变量。当多个轨迹共享同一瓶颈时，单点修复便会表现为成功率跃迁。</p>
+<p>并在在顿悟之后，和llm很像，模型的额泛化性也得到了大幅提升。抓取前定位、抓取保持和重试规则迁移到相关任务后，其中一个任务由 9/20 提升至 20/20；RoboCasa 的跨任务宏平均由 64% 提升至 84%。迁移对象并非固定轨迹，而是 alignment、contact、grasp retention 和 relation satisfaction 等物理条件。</p>
+<figure>
+  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/scaling_robocasa.png" alt="Zetta 官方 RoboCasa scaling 与 zero-shot transfer">
+  <figcaption>图 6　Zetta 官方 RoboCasa scaling 与 zero-shot transfer。</figcaption>
+</figure>
+                </div>
+            </div>
+
+            <footer class="article-footer">
+                <a href="../../#blog">← 返回博客</a>
+                <a href="../../rights.html">版权与引用</a>
+                <a href="https://github.com/xixi-cc/xixi-cc.github.io">查看主页源码</a>
+            </footer>
+        </article>
+    </main>
+    <!-- Cloudflare Web Analytics -->
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"73522e5dee9b42b0be84b4847e4dd502"}'></script>
+    <!-- End Cloudflare Web Analytics -->
+</body>
+</html>
