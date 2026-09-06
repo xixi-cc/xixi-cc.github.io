@@ -1,3 +1,22 @@
+/* Use lining digits in prose without changing letters or MathJax fonts. */
+@font-face {
+    font-family: "Blog Numerals";
+    src: url("assets/fonts/roboto-400.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    unicode-range: U+0030-0039;
+}
+
+@font-face {
+    font-family: "Blog Numerals";
+    src: url("assets/fonts/roboto-700.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 600 700;
+    font-display: swap;
+    unicode-range: U+0030-0039;
+}
+
 @font-face {
     font-family: "STIX Two Math Web";
     src: url("assets/fonts/stix-two-math.woff2") format("woff2");
@@ -7,7 +26,7 @@
 }
 
 .article-page {
-    --blog-text: Georgia, "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", SimSun, "AR PL SungtiL GB", serif;
+    --blog-text: "Blog Numerals", Georgia, "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", SimSun, "AR PL SungtiL GB", serif;
     --latex-math: "STIX Two Math Web", "STIX Two Math", "Cambria Math", serif;
     background: var(--background);
 }
