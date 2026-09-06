@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import markdown
-from latex2mathml.converter import convert as latex_to_mathml
+from PIL import Image
 from markdown.extensions.toc import slugify_unicode
 
 
@@ -163,23 +163,58 @@ def normalize_latex(source: str) -> str:
         r"\Jdet": r"\mathcal{J}",
         r"\bm": r"\boldsymbol",
     }
-    for old, new in replacements.items():
-        source = source.replace(old, new)
-    return source
+    # Match complete TeX control words: \D must never consume \Delta.
+    return re.sub(r"\\[A-Za-z]+", lambda m: replacements.get(m.group(0), m.group(0)), source)
 
 
-def render_mathml(fragment: str) -> str:
-    """Replace Arithmatex wrappers with static MathML for offline reading."""
+def math_markup(source: str, display: str) -> str:
+    """Preserve TeX for the bundled MathJax parser, including AMS alignment."""
+    tag, left, right = ("div", r"\[", r"\]") if display == "block" else ("span", r"\(", r"\)")
+    return f'<{tag} class="arithmatex">{left}{html.escape(normalize_latex(source))}{right}</{tag}>'
+
+
+def render_math(fragment: str) -> str:
+    """Normalize only protected math, then let MathJax parse the original TeX."""
 
     def replace(match: re.Match[str]) -> str:
         source = html.unescape(match.group("latex").strip())
         if source.startswith(r"\(") and source.endswith(r"\)"):
-            return latex_to_mathml(normalize_latex(source[2:-2]), display="inline")
+            return math_markup(source[2:-2], display="inline")
         if source.startswith(r"\[") and source.endswith(r"\]"):
-            return latex_to_mathml(normalize_latex(source[2:-2]), display="block")
+            return math_markup(source[2:-2], display="block")
         raise ValueError(f"Unknown math delimiter: {source[:20]!r}")
 
     return ARITHMATEX_PATTERN.sub(replace, fragment)
+
+
+def optimize_images(body: str, output_path: Path) -> str:
+    """Build responsive WebP derivatives; retain original scientific figures."""
+    def replace(match: re.Match[str]) -> str:
+        tag = match.group(0)
+        src_match = re.search(r'src="([^"]+)"', tag)
+        if not src_match:
+            return tag
+        src = src_match.group(1)
+        if src.startswith(("http:", "https:", "data:")):
+            return tag
+        path = (output_path.parent / src).resolve()
+        if not path.is_relative_to(ROOT / "assets"):
+            return tag
+        with Image.open(path) as original:
+            width, height = original.size
+            variants = []
+            for size in sorted({min(width, n) for n in (640, 1280, 2080, width)}):
+                target = path.with_name(f"{path.stem}-{size}.webp")
+                if not target.exists() or target.stat().st_mtime < path.stat().st_mtime:
+                    resized = original.copy()
+                    if size < width:
+                        resized = original.resize((size, round(height * size / width)), Image.Resampling.LANCZOS)
+                    resized.save(target, "WEBP", lossless=True, method=6)
+                variants.append(f"{src.rsplit('/', 1)[0]}/{target.name} {size}w")
+        tag = tag.replace("<img ", f'<img loading="lazy" decoding="async" width="{width}" height="{height}" ')
+        sources = html.escape(", ".join(variants), quote=True)
+        return f'<picture><source type="image/webp" srcset="{sources}" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px">{tag}</picture>'
+    return re.sub(r"<img\b[^>]*>", replace, body)
 
 
 def render_article(article: Article) -> None:
@@ -194,18 +229,18 @@ def render_article(article: Article) -> None:
     body_source = normalize_markdown_math_blocks("\n".join(lines[1:]).strip())
     body_source, display_blocks = extract_display_math(body_source)
     renderer = markdown_renderer()
-    body = render_mathml(renderer.convert(body_source))
+    body = render_math(renderer.convert(body_source))
     for index, latex in enumerate(display_blocks):
         placeholder = f'<div data-math-block="{index}"></div>'
         body = body.replace(
             placeholder,
-            latex_to_mathml(normalize_latex(latex), display="block"),
+            math_markup(latex, display="block"),
         )
     toc = renderer.toc
 
     title_html = markdown_renderer().convert(title_source)
     title_html = title_html.removeprefix("<p>").removesuffix("</p>")
-    title_html = render_mathml(title_html)
+    title_html = render_math(title_html)
     plain_title = html.unescape(re.sub(r"<[^>]+>", "", title_html))
 
     if article.slug == "structure-factor":
@@ -220,7 +255,7 @@ def render_article(article: Article) -> None:
             'src="assets/',
             'src="../../assets/blog/harnessvla-to-zetta/',
         )
-    body = body.replace("<img ", '<img loading="lazy" decoding="async" ')
+    body = optimize_images(body, output_path)
 
     canonical = f"https://xixi-cc.github.io/blog/{article.slug}/"
     social_description = article.social_description or article.description
@@ -255,6 +290,17 @@ def render_article(article: Article) -> None:
         ensure_ascii=False,
     )
 
+    math_scripts = ""
+    if 'class="arithmatex"' in body or 'class="arithmatex"' in title_html:
+        math_scripts = """    <script>
+        window.MathJax = {
+            chtml: {fontURL: '../../assets/mathjax/output/chtml/fonts/woff-v2'},
+            options: {enableMenu: false}
+        };
+    </script>
+    <script defer src="../../assets/mathjax/tex-mml-chtml.js"></script>
+"""
+
     document = f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -275,13 +321,7 @@ def render_article(article: Article) -> None:
     <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../../styles.css">
     <link rel="stylesheet" href="../../blog.css">
-    <script>
-        window.MathJax = {{
-            chtml: {{fontURL: '../../assets/mathjax/output/chtml/fonts/woff-v2'}},
-            options: {{enableMenu: false}}
-        }};
-    </script>
-    <script defer src="../../assets/mathjax/tex-mml-chtml.js"></script>
+{math_scripts}
 </head>
 <body class="article-page">
     <header class="topbar">

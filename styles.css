@@ -20,6 +20,7 @@ body {
 }
 
 .home-page {
+    --muted: #000;
     font-size: 17px;
     line-height: 1.42;
 }

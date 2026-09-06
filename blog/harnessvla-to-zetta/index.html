@@ -27,6 +27,7 @@
         };
     </script>
     <script defer src="../../assets/mathjax/tex-mml-chtml.js"></script>
+
 </head>
 <body class="article-page">
     <header class="topbar">
@@ -81,21 +82,21 @@
 <h3 id="21-核心架构">2.1　核心架构</h3>
 <p>VLA 被封装为处理接触动作的 <span class="smallcaps">vla_act</span>；定位、移动、旋转、夹爪和释放由解析原语完成。Task Specific Memory 保存当前任务的成功示例，Global Memory 存放通用规则和失败模型。planner 负责选择原语及其调用时机。</p>
 <figure>
-  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/harnessvla_system_overview.png" alt="HarnessVLA 官方系统总览">
+  <picture><source type="image/webp" srcset="../../assets/blog/harnessvla-to-zetta/harnessvla_system_overview-640.webp 640w, ../../assets/blog/harnessvla-to-zetta/harnessvla_system_overview-1280.webp 1280w, ../../assets/blog/harnessvla-to-zetta/harnessvla_system_overview-2080.webp 2080w, ../../assets/blog/harnessvla-to-zetta/harnessvla_system_overview-4293.webp 4293w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="4293" height="2539" src="../../assets/blog/harnessvla-to-zetta/harnessvla_system_overview.png" alt="HarnessVLA 官方系统总览"></picture>
   <figcaption>图 1　HarnessVLA 官方系统总览：语义规划、记忆、冻结 VLA 与解析原语的分工。</figcaption>
 </figure>
 
 <figure>
-  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/harnessvla_primitive_composition.png" alt="Primitive composition">
+  <picture><source type="image/webp" srcset="../../assets/blog/harnessvla-to-zetta/harnessvla_primitive_composition-640.webp 640w, ../../assets/blog/harnessvla-to-zetta/harnessvla_primitive_composition-1280.webp 1280w, ../../assets/blog/harnessvla-to-zetta/harnessvla_primitive_composition-2080.webp 2080w, ../../assets/blog/harnessvla-to-zetta/harnessvla_primitive_composition-4147.webp 4147w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="4147" height="2102" src="../../assets/blog/harnessvla-to-zetta/harnessvla_primitive_composition.png" alt="Primitive composition"></picture>
   <figcaption>图 2　Primitive composition：解析控制负责 staging，VLA 负责接触丰富阶段。</figcaption>
 </figure>
 
-<p>论文报告的标准 LIBERO 成绩是 384/400（96.0%），同一冻结 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003C0;</mi><mrow><mn>0.5</mn></mrow></msub></mrow></math> checkpoint 的直接基线是 95.3%。在分布偏移更强的任务上，LIBERO-Pro 的 Codex 与 CC 版本分别为 72.1% 和 82.4%，RoboCasa365 为 57.1%，RoboTwin C2R 为 58.4%。</p>
+<p>论文报告的标准 LIBERO 成绩是 384/400（96.0%），同一冻结 <span class="arithmatex">\(\pi_{0.5}\)</span> checkpoint 的直接基线是 95.3%。在分布偏移更强的任务上，LIBERO-Pro 的 Codex 与 CC 版本分别为 72.1% 和 82.4%，RoboCasa365 为 57.1%，RoboTwin C2R 为 58.4%。</p>
 <h3 id="22-规划与执行的进一步解耦">2.2　规划与执行的进一步解耦</h3>
 <p>但是在复现过程中，我发现harnessvla的耗时特别久，超过2/3的时间都是agent推理消耗掉了，因为每执行一段primitive，就执行一次agent推理。</p>
 <p>但是很多primitive，比如<code>move_to</code>,都是很简单且确定性的primitive。因此我做了一个简单的优化：“每执行一段primitive，就执行一次agent推理”换成“每执行一串primitive，就执行一次agent推理”。并且做了仿真测试</p>
 <figure class="figure-compact">
-  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/event_loop.png" alt="我采用的分层闭环">
+  <picture><source type="image/webp" srcset="../../assets/blog/harnessvla-to-zetta/event_loop-640.webp 640w, ../../assets/blog/harnessvla-to-zetta/event_loop-1007.webp 1007w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="1007" height="317" src="../../assets/blog/harnessvla-to-zetta/event_loop.png" alt="我采用的分层闭环"></picture>
   <figcaption>图 3　我采用的分层闭环：短计划，单步执行，逐步反馈。</figcaption>
 </figure>
 
@@ -230,16 +231,16 @@
 <h2 id="3-zetta跨-episode-的-harness-更新">3　Zetta：跨 episode 的 harness 更新</h2>
 <h3 id="31-自进化的对象">3.1　自进化的对象</h3>
 <p>Zetta 同样冻结 VLA，更新对象是外层 harness：</p>
-<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="script">H</mi><mo>&#x0003D;</mo><mo stretchy="false">&#x0007B;</mo><mi>C</mi><mo>&#x0002C;</mo><mi>R</mi><mo>&#x0002C;</mo><mi mathvariant="script">T</mi><mo stretchy="false">&#x0007D;</mo><mo>&#x0002C;</mo></mrow></math>
+<div class="arithmatex">\[\mathcal H=\{C,R,\mathcal T\},\]</div>
 
-<p>其中 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>C</mi></mrow></math> 是 critic，<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>R</mi></mrow></math> 是 recovery playbook，<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi mathvariant="script">T</mi></mrow></math> 是工具集。整个更新有三层：</p>
+<p>其中 <span class="arithmatex">\(C\)</span> 是 critic，<span class="arithmatex">\(R\)</span> 是 recovery playbook，<span class="arithmatex">\(\mathcal T\)</span> 是工具集。整个更新有三层：</p>
 <ol>
 <li>每个动作后运行 critic，必要时触发 recovery；</li>
 <li>每批轨迹结束后聚类失败、诊断原因并生成候选修复；</li>
-<li>每轮只把能在新场景中复现的修复写回 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi mathvariant="script">H</mi></mrow></math>。</li>
+<li>每轮只把能在新场景中复现的修复写回 <span class="arithmatex">\(\mathcal H\)</span>。</li>
 </ol>
 <figure>
-  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/zetta_agent_framework.png" alt="Zetta 官方框架">
+  <picture><source type="image/webp" srcset="../../assets/blog/harnessvla-to-zetta/zetta_agent_framework-640.webp 640w, ../../assets/blog/harnessvla-to-zetta/zetta_agent_framework-1280.webp 1280w, ../../assets/blog/harnessvla-to-zetta/zetta_agent_framework-2080.webp 2080w, ../../assets/blog/harnessvla-to-zetta/zetta_agent_framework-3040.webp 3040w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="3040" height="2027" src="../../assets/blog/harnessvla-to-zetta/zetta_agent_framework.png" alt="Zetta 官方框架"></picture>
   <figcaption>图 4　Zetta 官方框架：在线执行，以及轨迹聚类、诊断、修复与 harness 合并。</figcaption>
 </figure>
 
@@ -247,14 +248,14 @@
 <h3 id="32-顿悟与泛化">3.2　顿悟与泛化</h3>
 <p>论文中，LIBERO-Pro 的成功率随迭代由 34.5% 提升至 90.8%，RoboCasa 由 73.6% 提升至 93.6%；agent inference latency 相对 RPent 降低 91%。</p>
 <figure>
-  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/zetta_aha_cases.png" alt="Zetta 官方 Aha cases">
+  <picture><source type="image/webp" srcset="../../assets/blog/harnessvla-to-zetta/zetta_aha_cases-640.webp 640w, ../../assets/blog/harnessvla-to-zetta/zetta_aha_cases-1280.webp 1280w, ../../assets/blog/harnessvla-to-zetta/zetta_aha_cases-2080.webp 2080w, ../../assets/blog/harnessvla-to-zetta/zetta_aha_cases-2934.webp 2934w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="2934" height="1650" src="../../assets/blog/harnessvla-to-zetta/zetta_aha_cases.png" alt="Zetta 官方 Aha cases"></picture>
   <figcaption>图 5　Zetta 官方 Aha cases：关键物理状态变量被修复后，成功率发生突跃。</figcaption>
 </figure>
 
 <p>有趣的是，发现自进化有一个“顿悟”的现象，这和llm中的“grokking”很像：加入 grasp-retention critic 后，成功率由 15% 升至 95%；补充 contact–grasp–retention recovery 后，由 10% 升至 60%；修正接近物体的几何关系后，则由 5% 升至 90%。论文将其称为 Aha moment。VLA 并未突然获得新的动作能力；harness 只是识别并修复了控制终局成败的关键状态变量。当多个轨迹共享同一瓶颈时，单点修复便会表现为成功率跃迁。</p>
 <p>并在在顿悟之后，和llm很像，模型的额泛化性也得到了大幅提升。抓取前定位、抓取保持和重试规则迁移到相关任务后，其中一个任务由 9/20 提升至 20/20；RoboCasa 的跨任务宏平均由 64% 提升至 84%。迁移对象并非固定轨迹，而是 alignment、contact、grasp retention 和 relation satisfaction 等物理条件。</p>
 <figure>
-  <img loading="lazy" decoding="async" src="../../assets/blog/harnessvla-to-zetta/scaling_robocasa.png" alt="Zetta 官方 RoboCasa scaling 与 zero-shot transfer">
+  <picture><source type="image/webp" srcset="../../assets/blog/harnessvla-to-zetta/scaling_robocasa-640.webp 640w, ../../assets/blog/harnessvla-to-zetta/scaling_robocasa-1280.webp 1280w, ../../assets/blog/harnessvla-to-zetta/scaling_robocasa-2080.webp 2080w, ../../assets/blog/harnessvla-to-zetta/scaling_robocasa-2489.webp 2489w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="2489" height="1491" src="../../assets/blog/harnessvla-to-zetta/scaling_robocasa.png" alt="Zetta 官方 RoboCasa scaling 与 zero-shot transfer"></picture>
   <figcaption>图 6　Zetta 官方 RoboCasa scaling 与 zero-shot transfer。</figcaption>
 </figure>
                 </div>
