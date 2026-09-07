@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>音频声学笔记 · 曹溪能</title>
+    <meta name="description" content="音频声学学习笔记：时频表示、衰减振荡与自回归模型、维纳滤波的投影和频域解释。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://xixi-cc.github.io/blog/audio-acoustics/">
+    <meta property="og:title" content="音频声学笔记">
+    <meta property="og:description" content="音频声学学习笔记：时频表示、衰减振荡与自回归模型、维纳滤波的投影和频域解释。">
+    <meta property="og:image" content="https://xixi-cc.github.io/assets/blog/audio-acoustics/framework_time_frequency.png">
+    <meta name="twitter:image" content="https://xixi-cc.github.io/assets/blog/audio-acoustics/framework_time_frequency.png">
+    <meta property="article:published_time" content="2026-09-08">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="音频声学笔记">
+    <meta name="twitter:description" content="音频声学学习笔记：时频表示、衰减振荡与自回归模型、维纳滤波的投影和频域解释。">
+    <link rel="canonical" href="https://xixi-cc.github.io/blog/audio-acoustics/">
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "音频声学笔记", "description": "音频声学学习笔记：时频表示、衰减振荡与自回归模型、维纳滤波的投影和频域解释。", "datePublished": "2026-09-08", "dateModified": "2026-09-08", "inLanguage": "zh-CN", "url": "https://xixi-cc.github.io/blog/audio-acoustics/", "mainEntityOfPage": "https://xixi-cc.github.io/blog/audio-acoustics/", "author": {"@type": "Person", "name": "Xineng Cao", "alternateName": ["Xixi Cao", "曹溪能"], "url": "https://xixi-cc.github.io/"}}</script>
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../blog.css">
+    <script>
+        window.MathJax = {
+            chtml: {fontURL: '../../assets/mathjax/output/chtml/fonts/woff-v2'},
+            options: {enableMenu: false}
+        };
+    </script>
+    <script defer src="../../assets/mathjax/tex-mml-chtml.js"></script>
+
+</head>
+<body class="article-page">
+    <header class="topbar">
+        <nav aria-label="主导航">
+            <a href="../../">主页</a>
+            <a href="../../#reading">论文追踪</a>
+            <a href="../../#blog" aria-current="page">博客</a>
+        </nav>
+    </header>
+
+    <main class="article-shell">
+        <article class="blog-article">
+            <header class="article-header">
+                <p class="article-kicker"><a href="../../#blog">研究笔记</a></p>
+                <h1>音频声学笔记</h1>
+                <p class="article-meta"><time datetime="2026-09-08">2026 年 9 月 8 日</time> · 声学与信号处理</p>
+            </header>
+
+            <details class="article-outline">
+                <summary>文章目录</summary>
+                <div class="toc">
+<ul>
+<li><a href="#整体框架">整体框架</a></li>
+<li><a href="#信号表示">信号表示</a><ul>
+<li><a href="#协方差本征模变换">协方差本征模变换</a></li>
+<li><a href="#短时傅里叶变换">短时傅里叶变换</a></li>
+<li><a href="#小波变换">小波变换</a></li>
+<li><a href="#时频分辨率比较">时频分辨率比较</a></li>
+<li><a href="#滤波器组观点">滤波器组观点</a></li>
+</ul>
+</li>
+<li><a href="#自回归模型">自回归模型</a><ul>
+<li><a href="#自回归模型与线性预测">自回归模型与线性预测</a></li>
+<li><a href="#自回归模型的训练">自回归模型的训练</a></li>
+</ul>
+</li>
+<li><a href="#信号恢复">信号恢复</a><ul>
+<li><a href="#维纳滤波的投影解释">维纳滤波的投影解释</a></li>
+<li><a href="#频域维纳滤波">频域维纳滤波</a></li>
+<li><a href="#最小二乘与非线性估计">最小二乘与非线性估计</a></li>
+<li><a href="#最小均方自适应算法">最小均方自适应算法</a></li>
+<li><a href="#逆协方差与正则化">逆协方差与正则化</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+            </details>
+
+            <div class="article-layout">
+                <div class="article-content">
+                    <p>本笔记梳理音频声学中的信号表示、统计估计与信号恢复，侧重主要模型及其物理解释。</p>
+<h2 id="整体框架">整体框架</h2>
+<p>把对象统一为有限时间序列 <span class="arithmatex">\(x_n\)</span> 或多通道向量 <span class="arithmatex">\(\boldsymbol x_n\)</span>。相关方法分为三类：</p>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>输入</th>
+<th>输出</th>
+<th>主要问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>表示</td>
+<td>一条信号及分析基</td>
+<td>展开系数；数据依赖的基</td>
+<td>选择表示信号的基</td>
+</tr>
+<tr>
+<td>统计估计</td>
+<td>有限样本及统计假设</td>
+<td>谱、协方差或模型参数</td>
+<td>怎样从一次实现估计总体性质？</td>
+</tr>
+<tr>
+<td>信号恢复</td>
+<td>观测及目标相关信息</td>
+<td>目标估计，有时含不确定性</td>
+<td>从观测数据恢复目标</td>
+</tr>
+</tbody>
+</table>
+<p>记连续傅里叶变换为 <span class="arithmatex">\(X(\omega)=\int x(t)e^{-\mathrm{i}\omega t}\mathop{}\!\mathrm{d} t\)</span>，逆变换含 <span class="arithmatex">\(1/(2\pi)\)</span>。离散角频率 <span class="arithmatex">\(\Omega=\omega\Delta t\)</span>，<span class="arithmatex">\(\Delta t\)</span> 为采样间隔。信号默认去均值，实向量用转置，复向量用共轭转置；<span class="arithmatex">\(\mathbb{E}\)</span> 表示总体平均，帽号表示由数据得到的估计。</p>
+<h2 id="信号表示">信号表示</h2>
+<h3 id="协方差本征模变换">协方差本征模变换</h3>
+<p>卡尔胡宁—洛埃夫变换以协方差本征向量为正交基，展开系数互不相关，其方差为对应本征值。按本征值降序排列，前几个模保留最大的总方差；能否用少数模表示信号取决于本征值的分布：</p>
+<div class="arithmatex">\[\boldsymbol C\boldsymbol q_j=\lambda_j\boldsymbol q_j,\qquad
+y_j=\boldsymbol q_j^{\mathrm T}\boldsymbol x,\qquad \boldsymbol C=\mathbb{E}[\boldsymbol x\boldsymbol x^{\mathrm T}].\]</div>
+
+<h3 id="短时傅里叶变换">短时傅里叶变换</h3>
+<p>全局傅里叶变换不保留频率成分的时间定位。短时傅里叶变换通过以 <span class="arithmatex">\(\tau\)</span> 为中心的局部加窗引入时间坐标：</p>
+<div class="arithmatex">\[X(\tau,\omega)=\int x(t)g(t-\tau)e^{-\mathrm{i}\omega t}\mathop{}\!\mathrm{d} t.\]</div>
+<p>实窗 <span class="arithmatex">\(g\)</span> 决定分析时长及边缘权重。复系数的模反映局部振荡强度，相位反映振荡的对齐关系；时频图通常只显示模或模平方。</p>
+<p>对单频信号 <span class="arithmatex">\(x(t)=A e^{\mathrm{i}\omega_0t}\)</span>，令 <span class="arithmatex">\(u=t-\tau\)</span>，得到</p>
+<p><strong>单频信号的局部频谱</strong></p>
+<div class="arithmatex">\[X(\tau,\omega)=A e^{-\mathrm{i}(\omega-\omega_0)\tau}G(\omega-\omega_0),
+\qquad G(\nu)=\int g(u)e^{-\mathrm{i}\nu u}\mathop{}\!\mathrm{d} u.\]</div>
+
+<p>在窗口完整落入记录的区域内，单频信号的系数模不随时间变化；频带中心为 <span class="arithmatex">\(\omega_0\)</span>，展宽和旁瓣由窗频谱 <span class="arithmatex">\(G\)</span> 决定。</p>
+<p>比较同样支撑在 <span class="arithmatex">\([-T/2,T/2]\)</span> 的矩形窗与汉宁窗（Hann 窗）：</p>
+<div class="arithmatex">\[\begin{aligned}
+g_{\text{矩}}(u)&amp;=\mathbf1_{|u|\le T/2},\\
+g_{\text{汉}}(u)&amp;=\tfrac12[1+\cos(2\pi u/T)]\mathbf1_{|u|\le T/2}.
+\end{aligned}\]</div>
+
+<p>矩形窗突然截断振荡，主瓣较窄，远处旁瓣却较强；汉宁窗在两端平滑归零，远处泄漏减弱，代价是主瓣变宽。</p>
+<p><picture><source type="image/webp" srcset="../../assets/blog/audio-acoustics/framework_windows-640.webp 640w, ../../assets/blog/audio-acoustics/framework_windows-1280.webp 1280w, ../../assets/blog/audio-acoustics/framework_windows-1639.webp 1639w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="1639" height="1316" alt="windows" src="../../assets/blog/audio-acoustics/framework_windows.png"></picture></p>
+<p>矩形窗与汉宁窗对同一单频信号的分析：原始波形与窗形、时频图、固定时刻的频率切片。信号频率 <span class="arithmatex">\(40\)</span> 赫兹，窗长 <span class="arithmatex">\(0.25\)</span> 秒；幅度按各窗的单频响应校准，以 <span class="arithmatex">\(20\log_{10}\)</span> 显示。所示窗口均完整落在记录内。</p>
+<p>分辨邻近频率需要足够长的观察时间，以积累可辨认的相位差；定位短事件则要求较短的窗口。频率差为 <span class="arithmatex">\(\Delta f\)</span>、结构变化时间为 <span class="arithmatex">\(T_{\rm var}\)</span> 时，希望存在（左侧常数取决于窗形和分辨判据）</p>
+<div class="arithmatex">\[1/\Delta f\lesssim T\ll T_{\rm var}.\]</div>
+
+<h3 id="小波变换">小波变换</h3>
+<p>小波的分析时长随振荡周期缩放：低频对应长窗口，高频对应短窗口。以带零均值修正的复莫莱小波为例：</p>
+<div class="arithmatex">\[\psi(u)=C\left(e^{\mathrm{i}\omega_\psi u}-e^{-\omega_\psi^2/2}\right)e^{-u^2/2},
+\qquad \omega_\psi=6.\]</div>
+<p><span class="arithmatex">\(u\)</span> 无量纲，<span class="arithmatex">\(C\)</span> 使 <span class="arithmatex">\(\int|\psi|^2\mathop{}\!\mathrm{d} u=1\)</span>。高斯包络限定振荡的持续范围，修正项使积分为零，从而消除对恒定偏置的响应。实部与虚部提取两个近似正交的振荡分量。</p>
+<p>平移 <span class="arithmatex">\(b\)</span>、缩放 <span class="arithmatex">\(a&gt;0\)</span> 后，分析模板与小波系数为：</p>
+<div class="arithmatex">\[\psi_{a,b}(t)=a^{-1/2}\psi((t-b)/a),\qquad
+W_x(a,b)=\int x(t)\psi_{a,b}^*(t)\mathop{}\!\mathrm{d} t.\]</div>
+<p>这里 <span class="arithmatex">\(a,b\)</span> 以秒计，<span class="arithmatex">\(a^{-1/2}\)</span> 保持模板的平方积分不变。尺度 <span class="arithmatex">\(a\)</span> 同时控制包络宽度与振荡周期，<span class="arithmatex">\(W_x\)</span> 为信号在该模板上的投影系数。</p>
+<p>若母小波频谱峰位于无量纲角频率 <span class="arithmatex">\(\omega_c\)</span>，傅里叶缩放性质给出</p>
+<p><strong>尺度与中心频率</strong></p>
+<div class="arithmatex">\[(b,a)\longmapsto(t_{\text{中心}},\omega_{\text{中心}})
+=\left(b,\frac{\omega_c}{a}\right),\qquad \omega_c\simeq6.\]</div>
+
+<p>因此 <span class="arithmatex">\((b,a)\)</span> 可换成 <span class="arithmatex">\((b,\omega_c/a)\)</span> 的时频坐标；尺度越大，中心频率越低。</p>
+<p><picture><source type="image/webp" srcset="../../assets/blog/audio-acoustics/framework_wavelet_cells-640.webp 640w, ../../assets/blog/audio-acoustics/framework_wavelet_cells-1280.webp 1280w, ../../assets/blog/audio-acoustics/framework_wavelet_cells-1640.webp 1640w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="1640" height="1028" alt="wavelet_cells" src="../../assets/blog/audio-acoustics/framework_wavelet_cells.png"></picture></p>
+<p>复莫莱模板及其时频分辨范围。上：母小波与两种尺度的模板，按中心值归一。下：固定窗保持分析时长与绝对带宽；小波在低频使用长窗口，在高频使用短窗口。方块表示有效分辨范围。</p>
+<h3 id="时频分辨率比较">时频分辨率比较</h3>
+<p>对一个固定模板，缩放使有效时间宽度与频带宽度分别满足 <span class="arithmatex">\(\Delta t\propto a\)</span>、<span class="arithmatex">\(\Delta\omega\propto1/a\)</span>。因此小波近似保持相对带宽 <span class="arithmatex">\(\Delta\omega/\omega_{\text{中心}}\)</span>；固定窗的短时傅里叶变换保持绝对带宽。时间与频率分辨的折中仍然存在。</p>
+<p>下图 先给出原信号，再展示短窗、长窗和小波的结果。</p>
+<p><picture><source type="image/webp" srcset="../../assets/blog/audio-acoustics/framework_time_frequency-640.webp 640w, ../../assets/blog/audio-acoustics/framework_time_frequency-1280.webp 1280w, ../../assets/blog/audio-acoustics/framework_time_frequency-1637.webp 1637w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="1637" height="1496" alt="time_frequency" src="../../assets/blog/audio-acoustics/framework_time_frequency.png"></picture></p>
+<p>两个波包的时频表示。上行为原始信号；短、长汉宁窗分别为 <span class="arithmatex">\(82\)</span>、<span class="arithmatex">\(328\)</span> 点（采样率每秒 <span class="arithmatex">\(1024\)</span> 点），小波采用复莫莱模板。颜色为按单频响应校准的幅度，白色标记为已知波包中心，灰区提示记录边界影响。</p>
+<h3 id="滤波器组观点">滤波器组观点</h3>
+<p>固定分析频率时，短时傅里叶系数等价于带通滤波输出乘以一个已知相位因子。因此逐窗变换也可视为并行滤波器组：各通道提取一个频带随时间的变化。</p>
+<h2 id="自回归模型">自回归模型</h2>
+<h3 id="自回归模型与线性预测">自回归模型与线性预测</h3>
+<p>设 <span class="arithmatex">\(x_n\)</span> 为等时间间隔采样的声压。振动具有连续性：一个模被激发后，会继续振荡并逐渐衰减，因此相邻时刻的声压通常相关。自回归模型用最近 <span class="arithmatex">\(p\)</span> 个采样值描述这种记忆：</p>
+<div class="arithmatex">\[x_n=-\sum_{k=1}^p a_kx_{n-k}+u_n.\]</div>
+<p>前一项为线性预测，系数 <span class="arithmatex">\(a_k\)</span> 描述过去的振动对当前值的影响；<span class="arithmatex">\(u_n\)</span> 是预测后剩下的新扰动，称为创新。模型假设创新均值为零、方差为 <span class="arithmatex">\(\sigma_u^2\)</span>，且不同时刻互不相关，并与过去的信号不相关。它可代表持续激发振动的随机驱动，不必是测量误差。</p>
+<p>二阶模型可直接描述一个衰减振荡模：</p>
+<div class="arithmatex">\[x_n=2r\cos\Omega_0\,x_{n-1}-r^2x_{n-2}+u_n,
+\qquad 0&lt;r&lt;1.\]</div>
+<p>撤去驱动后，其自由振动为 <span class="arithmatex">\(x_n=A r^n\cos(n\Omega_0+\phi)\)</span>。<span class="arithmatex">\(A,\phi\)</span> 由初始条件决定；<span class="arithmatex">\(\Omega_0\)</span> 是每个采样间隔内的振荡相位，取 <span class="arithmatex">\(0&lt;\Omega_0&lt;\pi\)</span>。若采样间隔为 <span class="arithmatex">\(\Delta t\)</span>，振荡角频率为 <span class="arithmatex">\(\Omega_0/\Delta t\)</span>，振幅衰减时间为</p>
+<div class="arithmatex">\[\tau_d=-\frac{\Delta t}{\log r}.\]</div>
+<p><span class="arithmatex">\(r\)</span> 越接近 <span class="arithmatex">\(1\)</span>，振动衰减越慢，记忆越长。在远离零频及采样上限的弱阻尼情形，谱峰位于振荡频率附近，衰减越慢，峰越窄。这里是离散受驱振子的模型；连续振子采样后的随机驱动不一定仍是白色创新。</p>
+<p>对稳定的自回归模型，白色驱动经过上述递推形成有色声压信号，其离散功率谱为</p>
+<div class="arithmatex">\[S^{(d)}_{xx}(\Omega)=\frac{\sigma_u^2}
+{\left|1+\sum_{k=1}^p a_ke^{-\mathrm{i} k\Omega}\right|^2}.\]</div>
+<p>分母描述各频率的响应，接近共振的频率被放大，形成谱峰。因此拟合自回归系数，也是在拟合信号的振荡频率和衰减尺度。阶数过低可能漏掉振动成分，过高则可能把随机起伏拟合成额外的峰。</p>
+<p>纯弛豫对应更简单的一阶模型。连续过程 <span class="arithmatex">\(\dot x=-\gamma x+\eta\)</span> 中，<span class="arithmatex">\(\gamma&gt;0\)</span>，<span class="arithmatex">\(\eta\)</span> 为零均值高斯白噪声，满足 <span class="arithmatex">\(\mathbb{E}[\eta(t)\eta(t&#x27;)]=2D\delta(t-t&#x27;)\)</span>。间隔 <span class="arithmatex">\(\Delta t\)</span> 精确采样后，</p>
+<div class="arithmatex">\[x_{n+1}=\rho x_n+u_n,\qquad \rho=e^{-\gamma\Delta t},\qquad
+\sigma_u^2=\frac{D}{\gamma}(1-\rho^2).\]</div>
+<p>稳态相关按 <span class="arithmatex">\(e^{-\gamma|t|}\)</span> 衰减，连续谱为 <span class="arithmatex">\(2D/(\gamma^2+\omega^2)\)</span>。弛豫越慢，低频峰越窄；与上面的振荡模相比，它没有非零的自由振荡频率。</p>
+<h3 id="自回归模型的训练">自回归模型的训练</h3>
+<p>训练就是从一段已知记录中确定预测系数。每次取前 <span class="arithmatex">\(p\)</span> 个声压值预测下一点，用实际值减去预测值得到误差，再调整系数，使整段记录的平均平方误差最小：</p>
+<div class="arithmatex">\[\hat x_n=-\sum_{k=1}^p a_kx_{n-k},\qquad
+L=\frac1{N-p}\sum_{n=p+1}^{N}(x_n-\hat x_n)^2.\]</div>
+<p><span class="arithmatex">\(N\)</span> 为记录长度。由于预测对系数是线性的，可直接用最小二乘求解。拟合后检查模型是否稳定，以及残差是否还含明显的相关振荡；若有，说明模型尚未描述这部分结构。</p>
+<p>自回归语言模型也根据前面的内容预测下一项，但输入是文本单元，输出是下一项的概率。训练时提高真实下一项的预测概率，通过反向传播逐步调整网络参数。两者的主要区别是：经典模型学习少量线性系数，语言模型学习更复杂的非线性关系。</p>
+<p>训练通常使用记录中的真实历史；生成时则把刚生成的结果作为后续输入。经典模型按递推式加入随机创新，语言模型从预测分布中选取下一项。它们都逐步生成序列，预测误差也可能随递推累积。参见<a href="https://d2l.ai/chapter_recurrent-neural-networks/language-model.html">《动手学深度学习》语言模型章节</a>。</p>
+<h2 id="信号恢复">信号恢复</h2>
+<h3 id="维纳滤波的投影解释">维纳滤波的投影解释</h3>
+<p>设目标 <span class="arithmatex">\(d\)</span> 与观测 <span class="arithmatex">\(x_1,\ldots,x_m\)</span> 均为零均值实随机变量。维纳滤波在线性估计 <span class="arithmatex">\(\hat d=\boldsymbol w^{\mathrm T}\boldsymbol x\)</span> 中最小化总体均方误差 <span class="arithmatex">\(\mathbb{E}[(d-\hat d)^2]\)</span>。观测可取同一信号在不同时刻的采样。</p>
+<p><strong>维纳滤波的几何图像</strong></p>
+<p>维纳滤波就是把目标随机变量 <span class="arithmatex">\(d\)</span> 正交投影到由可观测量 <span class="arithmatex">\(x_1,\ldots,x_m\)</span> 张成的线性子空间。</p>
+<div class="arithmatex">\[\mathcal V=\left\{\sum_iw_ix_i\right\},\qquad
+d=\hat d+e,\qquad \mathbb{E}[e x_i]=0\quad(\text{每个 }i).\]</div>
+
+<p>随机变量空间的内积为 <span class="arithmatex">\(\langle u,v\rangle=\mathbb{E}[uv]\)</span>，长度平方为均方幅度。若残差仍与某个观测相关，沿该方向调整估计即可降低误差；最优残差因此与整个观测子空间正交。正交只要求不相关，不要求独立。</p>
+<p>任取另一个允许的估计 <span class="arithmatex">\(v\in\mathcal V\)</span>，把误差拆成互相正交的两部分，便有</p>
+<div class="arithmatex">\[\mathbb{E}[(d-v)^2]=\mathbb{E}[e^2]+\mathbb{E}[(\hat d-v)^2].\]</div>
+<p>第二项非负，故投影 <span class="arithmatex">\(\hat d\)</span> 使均方误差最小。把 <span class="arithmatex">\(e=d-\sum_jw_jx_j\)</span> 代入正交条件，就得到</p>
+<div class="arithmatex">\[\boldsymbol R_x\boldsymbol w_\star=\boldsymbol r_{dx},\qquad
+\boldsymbol R_x=\mathbb{E}[\boldsymbol x\boldsymbol x^{\mathrm T}],\quad
+\boldsymbol r_{dx}=\mathbb{E}[d\boldsymbol x].\]</div>
+<p>互相关给出观测与目标的联系，协方差校正观测间的相关性。若观测线性相关，权重可不唯一，但投影仍唯一。</p>
+<p>当 <span class="arithmatex">\(\boldsymbol R_x\)</span> 正定时，可以用 <span class="arithmatex">\(\boldsymbol z=\boldsymbol R_x^{-1/2}\boldsymbol x\)</span> 白化，使 <span class="arithmatex">\(\mathbb{E}[\boldsymbol z\boldsymbol z^{\mathrm T}]=\boldsymbol I\)</span>。此时每个方向的投影系数直接是 <span class="arithmatex">\(\mathbb{E}[d z_i]\)</span>。换回原坐标才得到 <span class="arithmatex">\(\boldsymbol w_\star=\boldsymbol R_x^{-1}\boldsymbol r_{dx}\)</span>：白化使用逆平方根，最终权重出现逆协方差。</p>
+<h3 id="频域维纳滤波">频域维纳滤波</h3>
+<p>平稳过程的相关只依赖时间差，相关算子为卷积。傅里叶模是其本征函数，相关方程因而可按频率解耦。</p>
+<p><strong>傅里叶基下的维纳估计</strong></p>
+<p>频域维纳滤波是“相关结构已经在傅里叶基下对角化”的特殊情形：每个频率模分别进行最优线性估计。</p>
+<p>这一结论适用于无限平稳过程的相关卷积算子。有限记录的一般托普利茨相关矩阵并不被离散傅里叶变换严格对角化；周期模型的循环矩阵可以，长记录则常作近似。不同频率的模在二阶意义上解耦，不等于一般意义上的统计独立。</p>
+<p>对联合平稳的目标 <span class="arithmatex">\(s\)</span> 与观测 <span class="arithmatex">\(x\)</span>，允许使用过去和未来观测的非因果线性滤波给出</p>
+<div class="arithmatex">\[\hat S(\omega)=H(\omega)X(\omega),\qquad
+H(\omega)=\frac{S_{sx}(\omega)}{S_{xx}(\omega)},\]</div>
+<p>功率谱为平稳相关函数的傅里叶变换。其中互谱按 <span class="arithmatex">\(R_{sx}(\tau)=\mathbb{E}[s(t+\tau)x^*(t)]\)</span> 的傅里叶变换定义，且在 <span class="arithmatex">\(S_{xx}&gt;0\)</span> 处取比值。<span class="arithmatex">\(\hat S\)</span> 是目标变换系数的估计，双下标 <span class="arithmatex">\(S_{sx},S_{xx}\)</span> 是谱密度。无限平稳信号的变换应按谱表示理解，有限记录才直接计算普通傅里叶系数。</p>
+<p>在加性模型 <span class="arithmatex">\(x=s+n\)</span> 中，若目标与噪声不相关，各频率的误差谱为</p>
+<div class="arithmatex">\[\mathcal E_\omega(H)=|1-H|^2S_{ss}(\omega)+|H|^2S_{nn}(\omega).\]</div>
+<p>两项分别为目标衰减误差和残余噪声。对 <span class="arithmatex">\(H\)</span> 最小化可得</p>
+<div class="arithmatex">\[H_\star(\omega)=\frac{S_{ss}(\omega)}{S_{ss}(\omega)+S_{nn}(\omega)},\qquad
+S_{ee,\star}=\frac{S_{ss}S_{nn}}{S_{ss}+S_{nn}}.\]</div>
+<p>信号远强于噪声时 <span class="arithmatex">\(H\simeq1\)</span>，噪声占主导时 <span class="arithmatex">\(H\simeq0\)</span>。增益随频率处的信噪比变化，目标集中在非零频率时可呈带通形状。残余噪声谱为 <span class="arithmatex">\(|H|^2S_{nn}\)</span>，总误差还包含目标衰减项。</p>
+<p><picture><source type="image/webp" srcset="../../assets/blog/audio-acoustics/framework_estimation-640.webp 640w, ../../assets/blog/audio-acoustics/framework_estimation-1280.webp 1280w, ../../assets/blog/audio-acoustics/framework_estimation-1640.webp 1640w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="1640" height="1352" alt="estimation" src="../../assets/blog/audio-acoustics/framework_estimation.png"></picture></p>
+<p>维纳滤波的目标谱、增益、输出谱及恢复波形。目标谱中心 <span class="arithmatex">\(40\)</span> 赫兹，宽度参数 <span class="arithmatex">\(9\)</span> 赫兹；目标与独立白噪声的总体方差均为 <span class="arithmatex">\(1\)</span>。采用长 <span class="arithmatex">\(8\)</span> 秒、采样率每秒 <span class="arithmatex">\(256\)</span> 点的周期高斯模型。横轴为物理角频率，谱纵轴为离散双边谱值；总误差包含目标衰减与残余噪声。</p>
+<p>本例的目标谱与噪声谱由生成模型给定。实际估计需要训练对、独立噪声记录或额外模型，仅由 <span class="arithmatex">\(S_{xx}=S_{ss}+S_{nn}\)</span> 通常不能唯一分离两项。因果约束下需另求最优解。参见<a href="https://ocw.mit.edu/courses/6-011-signals-systems-and-inference-spring-2018/resources/mit6_011s18lec20/">麻省理工学院维纳滤波讲义</a>。</p>
+<h3 id="最小二乘与非线性估计">最小二乘与非线性估计</h3>
+<p>用有限训练对估计总体相关，可得到最小二乘方程。把观测排成设计矩阵 <span class="arithmatex">\(\boldsymbol X\)</span>，目标排成 <span class="arithmatex">\(\boldsymbol d\)</span>，最小二乘的正规方程为 <span class="arithmatex">\(\boldsymbol X^{\mathrm T}\boldsymbol X\hat{\boldsymbol w}=\boldsymbol X^{\mathrm T}\boldsymbol d\)</span>。在相应样本平均收敛的条件下，两侧除以样本数分别趋于总体相关。因此最小二乘是有限样本上的经验拟合，维纳滤波是总体平方误差下的最优线性估计；时序样本需要相应的遍历或混合条件来支持这种联系。</p>
+<p>若允许估计为任意平方可积函数 <span class="arithmatex">\(f(\boldsymbol x)\)</span>，平方误差的最优解是条件均值 <span class="arithmatex">\(\mathbb{E}[d\mid\boldsymbol x]\)</span>。联合高斯且零均值时，它是线性的，因而与维纳投影一致；一般分布下，线性观测空间只覆盖可预测信息的一部分。使用平方损失训练的非线性神经网络可以尝试逼近这个条件均值，但有限数据、函数表达能力和优化结果决定它实际学到什么。</p>
+<h3 id="最小均方自适应算法">最小均方自适应算法</h3>
+<p>最小均方自适应算法用单样本梯度更新线性滤波权重：</p>
+<div class="arithmatex">\[e_n=d_n-\boldsymbol w_n^{\mathrm T}\boldsymbol x_n,
+\qquad \boldsymbol w_{n+1}=\boldsymbol w_n+\mu e_n\boldsymbol x_n.\]</div>
+<p>给定初始权重与步长 <span class="arithmatex">\(\mu\)</span>，对每组训练对 <span class="arithmatex">\((\boldsymbol x_n,d_n)\)</span> 计算误差并更新权重。这是半平方损失下的随机梯度下降，可按输入能量归一化步长。</p>
+<p>小步长收敛与跟踪较慢，大步长增加稳态起伏并可能失稳。强相关输入使各本征方向的收敛速度差异增大，均方稳定性还依赖高阶矩和时序相关。</p>
+<p>在最优点附近，权重更新可近似为带噪弛豫，协方差本征值控制各方向的弛豫速度。梯度噪声一般不满足热平衡噪声的条件。</p>
+<p>对固定总体目标的确定性梯度迭代，权重误差的第 <span class="arithmatex">\(i\)</span> 个协方差本征分量满足 <span class="arithmatex">\(v_i^{(k+1)}=(1-\mu\lambda_i)v_i^{(k)}\)</span>。这说明大本征值方向限制稳定步长，小本征值方向决定慢收敛；确定性迭代的界是 <span class="arithmatex">\(0&lt;\mu&lt;2/\lambda_{\max}\)</span>，不能直接当作随机更新的一般均方稳定界。</p>
+<h3 id="逆协方差与正则化">逆协方差与正则化</h3>
+<p>逆协方差在本征方向上除以相应方差，校正相关性与尺度。如果小本征值主要来自有限样本误差，这一步也会放大误差。对角加载 <span class="arithmatex">\(\widehat{\boldsymbol R}+\alpha\boldsymbol I\)</span> 限制这种放大，代价是引入偏差并改变原来的最优解。</p>
+<p>高斯先验下，逆协方差在负对数概率中扮演二次型刚度；观测约束与先验约束的刚度相加。实践中应解线性系统，而非显式计算逆矩阵。</p>
+<p>例如线性高斯模型 <span class="arithmatex">\(\boldsymbol y=\boldsymbol H\boldsymbol s+\boldsymbol n\)</span>，取零均值先验与独立零均值噪声，正定协方差为 <span class="arithmatex">\(\boldsymbol C_s,\boldsymbol C_n\)</span>，后验的核心结构是</p>
+<div class="arithmatex">\[\boldsymbol C_{\rm post}^{-1}=\boldsymbol C_s^{-1}+\boldsymbol H^{\mathrm T}\boldsymbol C_n^{-1}\boldsymbol H,
+\qquad \hat{\boldsymbol s}=\boldsymbol C_{\rm post}\boldsymbol H^{\mathrm T}\boldsymbol C_n^{-1}\boldsymbol y.\]</div>
+<p>先验提供初始刚度，测量在能看见的方向增加刚度，二者共同决定估计和不确定性。各向同性先验与噪声给出岭正则化形式，相当于在拟合误差之外惩罚过大的系数。</p>
+<p>图中信号均为合成数据。完整采样值、参数及复现方法见 <a href="../../assets/blog/audio-acoustics/example-data.zip">示例数据与说明</a>。</p>
+<p>本文保留课程中的表示、谱估计与线性恢复主题；物理解释、人工智能联系及比较图为补充内容。谱估计与线性估计可参照 Carl Wunsch 的<a href="https://web.mit.edu/12.864/classnotes.pdf">时间序列分析讲义</a>。一般相关与谱的关系不要求热平衡，涨落耗散关系则需相应的平衡与响应假设。</p>
+<p><a href="../../assets/blog/audio-acoustics/audio_acoustics_notes.pdf">下载 PDF</a> · <a href="../../assets/blog/audio-acoustics/example-data.zip">下载示例数据</a></p>
+                </div>
+            </div>
+
+            <footer class="article-footer">
+                <a href="../../#blog">← 返回博客</a>
+                <a href="../../rights.html">版权与引用</a>
+                <a href="https://github.com/xixi-cc/xixi-cc.github.io">查看主页源码</a>
+            </footer>
+        </article>
+    </main>
+    <!-- Cloudflare Web Analytics -->
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"73522e5dee9b42b0be84b4847e4dd502"}'></script>
+    <!-- End Cloudflare Web Analytics -->
+</body>
+</html>

@@ -35,6 +35,15 @@ class Article:
 
 ARTICLES = (
     Article(
+        slug="audio-acoustics",
+        source="audio-acoustics.md",
+        description="音频声学学习笔记：时频表示、衰减振荡与自回归模型、维纳滤波的投影和频域解释。",
+        published="2026-09-08",
+        published_zh="2026 年 9 月 8 日",
+        category="声学与信号处理",
+        image="assets/blog/audio-acoustics/framework_time_frequency.png",
+    ),
+    Article(
         slug="harnessvla-to-zetta",
         source="harnessvla-to-zetta.md",
         description="近期我学习并复现了 HarnessVLA 和 Zetta。",
