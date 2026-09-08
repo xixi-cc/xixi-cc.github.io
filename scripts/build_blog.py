@@ -27,66 +27,33 @@ class Article:
     source: str
     description: str
     published: str
-    published_zh: str
     category: str
     social_description: str | None = None
     image: str | None = None
 
+    @property
+    def published_zh(self) -> str:
+        year, month, day = map(int, self.published.split("-"))
+        return f"{year} 年 {month} 月 {day} 日"
 
-ARTICLES = (
-    Article(
-        slug="audio-acoustics",
-        source="audio-acoustics.md",
-        description="音频声学学习笔记：时频表示、衰减振荡与自回归模型、维纳滤波的投影和频域解释。",
-        published="2026-09-08",
-        published_zh="2026 年 9 月 8 日",
-        category="声学与信号处理",
-        image="assets/blog/audio-acoustics/framework_time_frequency.png",
-    ),
-    Article(
-        slug="harnessvla-to-zetta",
-        source="harnessvla-to-zetta.md",
-        description="近期我学习并复现了 HarnessVLA 和 Zetta。",
-        published="2026-09-06",
-        published_zh="2026 年 9 月 6 日",
-        category="具身智能",
-        image="assets/blog/harnessvla-to-zetta/harnessvla_system_overview.png",
-    ),
-    Article(
-        slug="martin-siggia-rose-formalism",
-        source="martin-siggia-rose-formalism.md",
-        description="从 Langevin 方程出发，经泛函数 Delta 约束、响应场和高斯噪声积分，推导 MSRJD 动作量，并以 OU 过程检验相关与响应。",
-        published="2026-08-28",
-        published_zh="2026 年 8 月 28 日",
-        category="统计场论",
-    ),
-    Article(
-        slug="langevin-fokker-planck",
-        source="langevin-fokker-planck.md",
-        description="从 Itô 随机微分方程出发，用生成元与短时传播核两条路线推导 Fokker–Planck 方程，并讨论 Stratonovich 约定。",
-        published="2026-08-28",
-        published_zh="2026 年 8 月 28 日",
-        category="随机过程",
-    ),
-    Article(
-        slug="numerical-simulation-notes",
-        source="numerical-simulation-notes.md",
-        description="面向 C/C++ 科学计算的简明检查表：内存布局、并行、随机数、浮点精度、I/O 与可复现性。",
-        published="2026-08-28",
-        published_zh="2026 年 8 月 28 日",
-        category="数值方法",
-    ),
-    Article(
-        slug="structure-factor",
-        source="structure-factor.md",
-        description="从 Fourier 定义、实空间关联和超均匀性，到周期粒子模拟、壳平均与 Type-1 NUFFT 的结构因子笔记。",
-        social_description="结构因子的定义、物理意义、有限尺寸效应与高精度数值计算。",
-        published="2026-08-26",
-        published_zh="2026 年 8 月 26 日",
-        category="理论与数值方法",
-        image="assets/blog/structure-factor-runtime.png",
-    ),
-)
+
+def load_articles() -> tuple[Article, ...]:
+    from datetime import date
+    records = json.loads((ROOT / "content/articles.json").read_text(encoding="utf-8"))
+    articles = tuple(Article(**record) for record in records)
+    if len({a.slug for a in articles}) != len(articles):
+        raise ValueError("Duplicate article slug")
+    for article in articles:
+        date.fromisoformat(article.published)
+        if not re.fullmatch(r"[a-z0-9-]+", article.slug):
+            raise ValueError(f"Invalid slug: {article.slug}")
+        source = (ROOT / "content" / article.source).resolve()
+        if not source.is_relative_to(ROOT / "content") or not source.is_file():
+            raise ValueError(f"Invalid article source: {article.source}")
+    return articles
+
+
+ARTICLES = load_articles()
 
 
 def markdown_renderer() -> markdown.Markdown:
@@ -377,9 +344,33 @@ def render_article(article: Article) -> None:
     output_path.write_text(document, encoding="utf-8")
 
 
+def render_homepage() -> None:
+    rows = []
+    for article in ARTICLES:
+        # The Markdown H1 is the only title source, including inline mathematics.
+        title = (ROOT / "content" / article.source).read_text(encoding="utf-8").splitlines()[0][2:].strip()
+        title = html.escape(title.replace("$", ""))
+        rows.append(f'''                <article>
+                    <time datetime="{article.published}">{article.published.replace("-", ".")}</time>
+                    <div>
+                        <h3><a href="blog/{article.slug}/">{title}</a></h3>
+                        <p>{html.escape(article.description)}</p>
+                    </div>
+                </article>''')
+    path = ROOT / "index.html"
+    source = path.read_text(encoding="utf-8")
+    start, end = "<!-- BEGIN GENERATED BLOG -->", "<!-- END GENERATED BLOG -->"
+    if source.count(start) != 1 or source.count(end) != 1:
+        raise ValueError("Homepage must contain one generated blog region")
+    before, rest = source.split(start)
+    _, after = rest.split(end)
+    path.write_text(before + start + "\n" + "\n".join(rows) + "\n            " + end + after, encoding="utf-8")
+
+
 def main() -> None:
     for article in ARTICLES:
         render_article(article)
+    render_homepage()
     sitemap_entries = [
         ("https://xixi-cc.github.io/", "2026-08-29"),
         ("https://xixi-cc.github.io/rights.html", "2026-08-29"),

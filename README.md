@@ -24,6 +24,12 @@ uv run --with-requirements requirements-blog.txt python scripts/build_blog.py
 ```
 
 Editable sources live under `content/`; generated pages live under `blog/<slug>/`.
+`content/articles.json` is the single metadata source for order, slug, source,
+description, publication date, category and optional social image/description.
+The title comes only from the Markdown H1; display dates are derived from the ISO date.
+The same build generates the marked homepage blog list and sitemap. Do not edit
+that generated region or the article HTML by hand. Add a note by creating its
+Markdown source and one metadata record, then run the build below.
 The MSRJD note is reproducibly derived from the curated LaTeX source before the
 site build:
 
