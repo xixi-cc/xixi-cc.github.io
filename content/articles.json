@@ -1,5 +1,12 @@
 [
   {
+    "slug": "numerical-simulation-notes",
+    "source": "numerical-simulation-notes.md",
+    "description": "面向 C++ 粒子模拟与场模拟的性能优化方向：从算法、内存和 CPU/GPU 并行，到随机数、I/O 与基准测试。",
+    "published": "2026-09-11",
+    "category": "数值方法"
+  },
+  {
     "slug": "audio-acoustics",
     "source": "audio-acoustics.md",
     "description": "音频声学学习笔记：时频表示、衰减振荡与自回归模型、维纳滤波的投影和频域解释。",
@@ -28,13 +35,6 @@
     "description": "从 Itô 随机微分方程出发，用生成元与短时传播核两条路线推导 Fokker–Planck 方程，并讨论 Stratonovich 约定。",
     "published": "2026-08-28",
     "category": "随机过程"
-  },
-  {
-    "slug": "numerical-simulation-notes",
-    "source": "numerical-simulation-notes.md",
-    "description": "面向 C/C++ 科学计算的简明检查表：内存布局、并行、随机数、浮点精度、I/O 与可复现性。",
-    "published": "2026-08-28",
-    "category": "数值方法"
   },
   {
     "slug": "structure-factor",
