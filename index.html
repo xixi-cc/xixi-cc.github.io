@@ -41,6 +41,7 @@
             <a href="#about">关于</a>
             <a href="#education">教育背景</a>
             <a href="#projects">研究项目</a>
+            <a href="#ai-practice">AI 实践</a>
             <a href="#skills">专业技能</a>
             <a href="#reading">论文追踪</a>
             <a href="#blog">博客</a>
@@ -54,8 +55,8 @@
                 <h1 id="page-title"><strong>曹溪能</strong> <span>Xixi Cao</span></h1>
                 <p class="role">南京大学物理学硕士研究生</p>
                 <p>
-                    研究方向为复杂系统与非平衡统计物理，关注活性物质、吸收态相变、
-                    时空晶体与统计场论，同时探索人工智能方法在物理研究中的应用。
+                    研究方向为复杂系统与非平衡统计物理，关注活性物质、非平衡相变、统计场论与流体力学场论。
+                    目前兴趣在“AI + 物理”，包括但不限于 AI 的可解释性、表示学习、生成模型、多模态、AI for Physics 与 AI 的自进化等。
                 </p>
                 <div class="contact-list" aria-label="联系方式">
                     <p>邮箱：<a href="mailto:502024220136@smail.nju.edu.cn">502024220136@smail.nju.edu.cn</a></p>
@@ -71,7 +72,7 @@
                     <time datetime="2024-09">2024.09—至今</time>
                     <div>
                         <h3>南京大学 · 物理学硕士</h3>
-                        <p>导师：马余强；研究方向：复杂系统与非平衡统计物理</p>
+                        <p>导师：马余强</p>
                     </div>
                 </article>
                 <article>
@@ -86,31 +87,52 @@
             <div class="project-list">
                 <article>
                     <div>
-                        <h3>沙堆模型中的时空晶体相变</h3>
-                        <p class="project-meta">共同第一作者 · 投稿中</p>
+                        <h3>周期驱动粒子系统中的时空结晶与临界行为</h3>
+                        <p class="project-meta">共同第一作者 · 理论贡献</p>
                     </div>
-                    <p>利用大规模格点模拟和格点场论，研究周期驱动—耗散系统中涌现的时空结构及其相变临界行为。</p>
+                    <div class="project-detail">
+                        <p lang="en">Criticality of Space-Time Crystallization in Periodically Driven Particle Systems</p>
+                        <p>从微观动力学规则出发构建格点场论，分析吸收态转变与时空结晶之间的联系，并考察噪声下的临界动力学。</p>
+                        <p class="project-meta">第十四届全国软物质与生命物质物理学术会议（2026.08）口头报告。</p>
+                    </div>
                 </article>
                 <article>
                     <div>
-                        <h3>极性有序导致的新型吸收态相变</h3>
-                        <p class="project-meta">第一作者 · 论文撰写中</p>
+                        <h3>活性物质中驱动时序对空间有序的选择</h3>
+                        <p class="project-meta">共同第一作者 · 理论及场模拟贡献</p>
                     </div>
-                    <p>利用粒子模拟和场模拟发现极性有序导致的新型吸收态相变，并结合标度分析与流体力学理论研究其机制。</p>
+                    <div class="project-detail">
+                        <p lang="en">Temporal encoding of spatial order in active matter</p>
+                        <p>以 Quincke roller 系统为对象，结合流体力学建模、稳定性分析与场模拟，解释驱动时序如何选择时空晶体的空间构型。</p>
+                        <p class="project-meta">第十四届全国软物质与生命物质物理学术会议（2026.08）海报。</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="ai-practice" aria-labelledby="ai-practice-title">
+            <h2 id="ai-practice-title">AI 实践</h2>
+            <div class="project-list">
+                <article>
+                    <div>
+                        <h3>具身智能实习</h3>
+                        <p class="project-meta">复旦大学张文强课题组<br>2026.08 · 半个月</p>
+                    </div>
+                    <p>调研 Agent Harness 与具身智能模型的结合方式，开展 HarnessVLA、Zetta 的复现实践，参与机械臂数据采集与测试。相关记录：<a href="https://xixi-cc.github.io/blog/harnessvla-to-zetta/">从 HarnessVLA 到 Zetta</a>。</p>
                 </article>
                 <article>
                     <div>
-                        <h3>Quincke roller 系统时空调制下的时空晶体</h3>
-                        <p class="project-meta">共同第一作者 · 论文撰写中</p>
+                        <h3>科研全流程 Agent 开发</h3>
+                        <p class="project-meta">基于 Get Physics Done 项目</p>
                     </div>
-                    <p>结合实验、粒子模拟、场模拟和场理论，研究时空晶体的形成机制及其对时空调制的响应。</p>
+                    <p>维护 <a href="https://github.com/xixi-cc/get-physics-done">Get Physics Done 个人研究分支</a>，面向 GPT-6 系统优化科研 Agent，在 token 消耗、执行效率与科研可靠性三方面实现显著改进。具体改动与验证范围见<a href="https://github.com/xixi-cc/get-physics-done/blob/main/PERSONAL-ASTRA-RELEASE.md">个人分支改进说明</a>。</p>
                 </article>
                 <article>
                     <div>
-                        <h3>事件驱动的静电随机组织现象</h3>
-                        <p class="project-meta">共同第一作者 · 研究进行中</p>
+                        <h3>物理与 AI 文献平台</h3>
+                        <p class="project-meta">个人学术库建设与维护</p>
                     </div>
-                    <p>构建事件驱动系统，研究高频碰撞诱导的随机组织及其涌现的无序超均匀结构。</p>
+                    <p>利用 AI 建设并维护<a href="https://xixi-cc.github.io/">个人主页</a>与<a href="https://xixi-cc.github.io/#blog">博客</a>、<a href="https://xixi-cc.github.io/daily-article-card/">每日论文速递</a>、<a href="https://xixi-cc.github.io/paper-collection/">个人文献库</a>和<a href="https://xixi-cc.github.io/article-share/">论文精读分享</a>。</p>
                 </article>
             </div>
         </section>
@@ -119,33 +141,34 @@
             <h2 id="skills-title">专业技能</h2>
             <dl class="skill-list">
                 <div>
-                    <dt>编程与科学计算</dt>
-                    <dd>Python、C++、NumPy、SciPy、Pandas、Matplotlib；Linux、Shell 脚本与高性能计算环境。</dd>
+                    <dt>数理与理论方法</dt>
+                    <dd>概率统计、线性代数、随机过程、非线性动力学与统计场论。</dd>
                 </div>
                 <div>
-                    <dt>AI 工作流</dt>
-                    <dd>使用 Codex、Skills、MCP 与脚本构建可复用的自动化研究工作流。</dd>
+                    <dt>数值模拟与科学计算</dt>
+                    <dd>粒子模拟、事件驱动模拟、场模拟与标度分析；高性能计算环境下的模型实现与数据分析。</dd>
                 </div>
                 <div>
-                    <dt>数理与理论基础</dt>
-                    <dd>线性代数、微积分、概率统计、随机过程、随机偏微分方程、统计场论与重整化群。</dd>
+                    <dt>编程与计算环境</dt>
+                    <dd>Python、C++；NumPy、SciPy、Pandas、Matplotlib 用于数值计算、数据处理与可视化；使用 Linux 和 Shell 脚本组织计算任务。</dd>
                 </div>
                 <div>
-                    <dt>机器学习</dt>
-                    <dd>理解深度学习基本原理，学习过 CNN、Transformer、生成模型与神经算子。</dd>
+                    <dt>AI 辅助科研</dt>
+                    <dd>AI 辅助编程；Agent、Skills、MCP 与 Harness 的配置和工作流集成。</dd>
+                </div>
+                <div>
+                    <dt>机器学习基础</dt>
+                    <dd>了解深度学习与生成模型原理。</dd>
                 </div>
                 <div>
                     <dt>英语</dt>
-                    <dd>CET-6 510；IELTS 6.5。</dd>
+                    <dd>IELTS 6.5（2026）；CET-6 510。</dd>
                 </div>
             </dl>
         </section>
 
         <section id="reading" aria-labelledby="reading-title">
             <h2 id="reading-title">论文追踪</h2>
-            <p class="section-intro">
-                这里汇总每日论文跟踪、长期文献归档，以及我在组内文献精读分享会上讲解过的文章与材料。
-            </p>
             <div class="collection-list">
                 <article>
                     <div>

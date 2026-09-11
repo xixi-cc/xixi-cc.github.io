@@ -136,6 +136,8 @@ p { margin: 0 0 12px; }
 
 .education-list p,
 .project-list p { margin: 0; }
+.project-detail p + p { margin-top: 10px; }
+.project-detail > p[lang="en"] { font-style: italic; }
 .project-meta { margin-top: 4px !important; }
 .skill-list { margin: 0; }
 .skill-list dt { font-weight: 600; }
