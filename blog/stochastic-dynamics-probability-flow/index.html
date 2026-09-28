@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>随机动力学与概率流 · 曹溪能</title>
+    <meta name="description" content="从 Langevin 动力学与 Fokker–Planck 方程出发，讨论概率流、平衡与非平衡稳态、Kolmogorov 与 Feynman–Kac 的关系，以及扩散生成模型。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://xixi-cc.github.io/blog/stochastic-dynamics-probability-flow/">
+    <meta property="og:title" content="随机动力学与概率流">
+    <meta property="og:description" content="从 Langevin 动力学与 Fokker–Planck 方程出发，讨论概率流、平衡与非平衡稳态、Kolmogorov 与 Feynman–Kac 的关系，以及扩散生成模型。">
+    <meta property="og:image" content="https://xixi-cc.github.io/assets/blog/stochastic-dynamics-probability-flow/langevin_fp_correspondence.png">
+    <meta name="twitter:image" content="https://xixi-cc.github.io/assets/blog/stochastic-dynamics-probability-flow/langevin_fp_correspondence.png">
+    <meta property="article:published_time" content="2026-09-28">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="随机动力学与概率流">
+    <meta name="twitter:description" content="从 Langevin 动力学与 Fokker–Planck 方程出发，讨论概率流、平衡与非平衡稳态、Kolmogorov 与 Feynman–Kac 的关系，以及扩散生成模型。">
+    <link rel="canonical" href="https://xixi-cc.github.io/blog/stochastic-dynamics-probability-flow/">
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "随机动力学与概率流", "description": "从 Langevin 动力学与 Fokker–Planck 方程出发，讨论概率流、平衡与非平衡稳态、Kolmogorov 与 Feynman–Kac 的关系，以及扩散生成模型。", "datePublished": "2026-09-28", "dateModified": "2026-09-28", "inLanguage": "zh-CN", "url": "https://xixi-cc.github.io/blog/stochastic-dynamics-probability-flow/", "mainEntityOfPage": "https://xixi-cc.github.io/blog/stochastic-dynamics-probability-flow/", "author": {"@type": "Person", "name": "Xineng Cao", "alternateName": ["Xixi Cao", "曹溪能"], "url": "https://xixi-cc.github.io/"}}</script>
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../blog.css">
+    <script>
+        window.MathJax = {
+            chtml: {fontURL: '../../assets/mathjax/output/chtml/fonts/woff-v2'},
+            options: {enableMenu: false}
+        };
+    </script>
+    <script defer src="../../assets/mathjax/tex-mml-chtml.js"></script>
+
+</head>
+<body class="article-page">
+    <header class="topbar">
+        <nav aria-label="主导航">
+            <a href="../../">主页</a>
+            <a href="../../#reading">论文追踪</a>
+            <a href="../../#blog" aria-current="page">博客</a>
+        </nav>
+    </header>
+
+    <main class="article-shell">
+        <article class="blog-article">
+            <header class="article-header">
+                <p class="article-kicker"><a href="../../#blog">研究笔记</a></p>
+                <h1>随机动力学与概率流</h1>
+                <p class="article-meta"><time datetime="2026-09-28">2026 年 9 月 28 日</time> · 随机过程</p>
+            </header>
+
+            <details class="article-outline">
+                <summary>文章目录</summary>
+                <div class="toc">
+<ul>
+<li><a href="#从-langevin-动力学到-fp-方程">从 Langevin 动力学到 FP 方程</a></li>
+<li><a href="#两个可解过程">两个可解过程：</a><ul>
+<li><a href="#自由布朗运动">自由布朗运动</a></li>
+<li><a href="#ornsteinuhlenbeck-过程">Ornstein–Uhlenbeck 过程</a></li>
+</ul>
+</li>
+<li><a href="#平衡细致平衡与非平衡稳态">平衡、细致平衡与非平衡稳态</a><ul>
+<li><a href="#过阻尼-langevin方程">过阻尼 Langevin方程</a></li>
+<li><a href="#经典非平衡例子带旋转漂移的二维-ou-过程">经典非平衡例子：带旋转漂移的二维 OU 过程</a></li>
+</ul>
+</li>
+<li><a href="#势垒逃逸从首达时间到-kramers-率">势垒逃逸：从首达时间到 Kramers 率</a></li>
+<li><a href="#fp方程和前向后向-kolmogorov-方程与-feynmankac方程的关系">FP方程和前向、后向 Kolmogorov 方程与 Feynman–Kac方程的关系</a></li>
+<li><a href="#时间反演与扩散生成模型">时间反演与扩散生成模型</a><ul>
+<li><a href="#反向过程">反向过程</a></li>
+<li><a href="#probability-flow-ode">Probability-flow ODE</a></li>
+</ul>
+</li>
+<li><a href="#参考资料">参考资料</a></li>
+</ul>
+</div>
+
+            </details>
+
+            <div class="article-layout">
+                <div class="article-content">
+                    <blockquote>
+<p>单粒子在d维的随机动力学的系综平均即概率表象下的d维PDE，即Fokker-Planck方程</p>
+<p>对d维FP方程的采样即单粒子在d维的随机动力学</p>
+<p>概率表象和粒子表象的关系</p>
+<div class="arithmatex">\[
+\rho_N(x,t)=\frac1N\sum_{\alpha=1}^N
+\delta^{(d)}(x-X_t^{(\alpha)}),
+\qquad
+\rho(x,t)=\left\langle\delta^{(d)}(x-X_t)\right\rangle.
+\tag{1}
+\]</div>
+</blockquote>
+<p><picture><source type="image/webp" srcset="../../assets/blog/stochastic-dynamics-probability-flow/langevin_fp_correspondence-640.webp 640w, ../../assets/blog/stochastic-dynamics-probability-flow/langevin_fp_correspondence-1280.webp 1280w, ../../assets/blog/stochastic-dynamics-probability-flow/langevin_fp_correspondence-1392.webp 1392w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="1392" height="462" alt="Langevin 轨道与 Fokker–Planck 密度演化的对应关系" src="../../assets/blog/stochastic-dynamics-probability-flow/langevin_fp_correspondence.png"></picture></p>
+<h2 id="从-langevin-动力学到-fp-方程">从 Langevin 动力学到 FP 方程</h2>
+<p>把 Langevin 动力学写成</p>
+<div class="arithmatex">\[\mathrm dX_t=b(X_t,t)\,\mathrm dt
++\sigma(X_t,t)\,\mathrm dW_t,
+\qquad a=\sigma\sigma^{\mathsf T}.
+\tag{2}\]</div>
+
+<p><span class="arithmatex">\(b\)</span> 是确定性漂移；<span class="arithmatex">\(W_t\)</span> 是 <span class="arithmatex">\(m\)</span> 维 Wiener 过程，<span class="arithmatex">\(\sigma\)</span> 把 <span class="arithmatex">\(m\)</span> 个噪声分量作用到 <span class="arithmatex">\(d\)</span> 个状态变量上。噪声为高斯白噪，满足</p>
+<div class="arithmatex">\[\langle\Delta W_k\rangle=0,\qquad
+\langle\Delta W_k\Delta W_l\rangle=\delta_{kl}\Delta t.
+\tag{3}\]</div>
+
+<p>因此，从位置 <span class="arithmatex">\(x\)</span> 出发的一小步具有</p>
+<div class="arithmatex">\[\langle\Delta X_i\rangle_x=b_i(x,t)\Delta t+O(\Delta t^2),\qquad
+\langle\Delta X_i\Delta X_j\rangle_x
+=a_{ij}(x,t)\Delta t+O(\Delta t^2).
+\tag{4}\]</div>
+
+<p>先看一个随位置变化的量 <span class="arithmatex">\(f(x)\)</span>，数学上叫测试函数。一步之后的变化按位移展开：</p>
+<div class="arithmatex">\[f(x+\Delta X)-f(x)
+\simeq \partial_i f\,\Delta X_i
++\frac12\partial_i\partial_j f\,\Delta X_i\Delta X_j.
+\tag{5}\]</div>
+
+<p>用式（4）取平均，除以 <span class="arithmatex">\(\Delta t\)</span>，再让时间步趋于零，得到</p>
+<div class="arithmatex">\[\frac{\mathrm d}{\mathrm dt}\langle f(X_t)\rangle
+=\left\langle b_i\partial_i f
++\frac12a_{ij}\partial_i\partial_j f\right\rangle.
+\tag{6}\]</div>
+
+<p>为方便后文，把这个算子（生成元）记为<span class="arithmatex">\(\mathcal L\)</span></p>
+<div class="arithmatex">\[\mathcal L f=b_i\partial_i f
++\frac12a_{ij}\partial_i\partial_j f.
+\tag{7}\]</div>
+
+<p>式（6）等价于</p>
+<div class="arithmatex">\[\int f\,\partial_t\rho\,\mathrm d^dx
+=\int\left(b_i\partial_i f
++\frac12a_{ij}\partial_i\partial_j f\right)\rho\,\mathrm d^dx.
+\tag{8}\]</div>
+
+<p>分部积分得到</p>
+<div class="arithmatex">\[\int f\,\partial_t\rho\,\mathrm d^dx
+=\int f\left[-\partial_i(b_i\rho)
++\frac12\partial_i\partial_j(a_{ij}\rho)\right]\mathrm d^dx.
+\tag{9}\]</div>
+
+<p>这里考虑全空间且密度在远处衰减（分部积分在物理中的常见操作，丢掉全积分）。由于对任意 <span class="arithmatex">\(f\)</span> 都成立，因此：</p>
+<div class="arithmatex">\[\boxed{
+\partial_t\rho
+=-\partial_i(b_i\rho)
++\frac12\partial_i\partial_j(a_{ij}\rho)
+\equiv\mathcal L^\dagger\rho.
+}
+\tag{10}\]</div>
+
+<p>这就是 Fokker-Planck方程。</p>
+<p>FP 方程也可以写成连续性方程：</p>
+<div class="arithmatex">\[\partial_t\rho+\nabla\cdot J=0,
+\tag{11}\]</div>
+
+<p>其中</p>
+<div class="arithmatex">\[J_i=b_i\rho-\frac12\partial_j(a_{ij}\rho).
+\tag{12}\]</div>
+
+<p>对于常数各向同性扩散，<span class="arithmatex">\(J=b\rho-D\nabla\rho\)</span>：一部分概率随漂移运动，另一部分由高密度处向低密度处扩散。</p>
+<h2 id="两个可解过程">两个可解过程：</h2>
+<h3 id="自由布朗运动">自由布朗运动</h3>
+<p>一维自由扩散满足</p>
+<div class="arithmatex">\[\mathrm dX_t=\sqrt{2D}\,\mathrm dW_t,
+\qquad
+\partial_t\rho=D\partial_x^2\rho.
+\tag{14}\]</div>
+
+<p>若 <span class="arithmatex">\(X_0=x_0\)</span>，基本解为</p>
+<div class="arithmatex">\[\rho(x,t\mid x_0,0)
+=\frac{1}{\sqrt{4\pi Dt}}
+\exp\!\left[-\frac{(x-x_0)^2}{4Dt}\right],
+\tag{15}\]</div>
+
+<p>因此 <span class="arithmatex">\(\langle X_t\rangle=x_0\)</span>，<span class="arithmatex">\(\operatorname{Var}X_t=2Dt\)</span>。自由布朗运动即是一个扩散的高斯波包</p>
+<h3 id="ornsteinuhlenbeck-过程">Ornstein–Uhlenbeck 过程</h3>
+<p>在线性回复力下，</p>
+<div class="arithmatex">\[\mathrm dX_t=-\gamma X_t\,\mathrm dt+\sqrt{2D}\,\mathrm dW_t,
+\qquad \gamma&gt;0.
+\tag{16}\]</div>
+
+<p>乘以积分因子 <span class="arithmatex">\(e^{\gamma t}\)</span> 可得精确解</p>
+<div class="arithmatex">\[X_t=x_0e^{-\gamma t}
++\sqrt{2D}\int_0^t e^{-\gamma(t-s)}\,\mathrm dW_s.
+\tag{17}\]</div>
+
+<p>随机积分是高斯变量，所以转移核仍是高斯分布，其均值和方差为</p>
+<div class="arithmatex">\[m_t=x_0e^{-\gamma t},
+\qquad
+v_t=\frac{D}{\gamma}\left(1-e^{-2\gamma t}\right).
+\tag{18}\]</div>
+
+<p>长时间极限为</p>
+<div class="arithmatex">\[\rho_{\mathrm ss}(x)
+=\sqrt{\frac{\gamma}{2\pi D}}
+\exp\!\left(-\frac{\gamma x^2}{2D}\right).
+\tag{19}\]</div>
+
+<p>若过程从稳态开始，相关函数为</p>
+<div class="arithmatex">\[\langle X_tX_0\rangle_{\mathrm ss}
+=\frac{D}{\gamma}e^{-\gamma|t|}.
+\tag{20}\]</div>
+
+<p><span class="arithmatex">\(\gamma^{-1}\)</span> 同时是均值弛豫和相关性衰减的时间尺度。自由布朗运动的方差无限增长；OU 回复力与扩散达到平衡，使方差饱和。</p>
+<p><picture><source type="image/webp" srcset="../../assets/blog/stochastic-dynamics-probability-flow/brownian_ou_trajectories-640.webp 640w, ../../assets/blog/stochastic-dynamics-probability-flow/brownian_ou_trajectories-1280.webp 1280w, ../../assets/blog/stochastic-dynamics-probability-flow/brownian_ou_trajectories-1980.webp 1980w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="1980" height="1364" alt="布朗运动与 Ornstein--Uhlenbeck 过程的轨道及密度" src="../../assets/blog/stochastic-dynamics-probability-flow/brownian_ou_trajectories.png"></picture></p>
+<h2 id="平衡细致平衡与非平衡稳态">平衡、细致平衡与非平衡稳态</h2>
+<h3 id="过阻尼-langevin方程">过阻尼 Langevin方程</h3>
+<p>考虑</p>
+<div class="arithmatex">\[\mathrm dX_t=-\nabla U(X_t)\,\mathrm dt
++\sqrt{2T_b}\,\mathrm dW_t.
+\tag{30}\]</div>
+
+<p>Fokker–Planck 方程及概率流为</p>
+<div class="arithmatex">\[\partial_t\rho
+=\nabla\cdot(\rho\nabla U)+T_b\Delta\rho,
+\qquad
+J=-\rho\nabla U-T_b\nabla\rho.
+\tag{31}\]</div>
+
+<p>令 <span class="arithmatex">\(J_{\mathrm eq}=0\)</span>，得到</p>
+<div class="arithmatex">\[\nabla\log\rho_{\mathrm eq}=-\frac{\nabla U}{T_b},
+\qquad
+\rho_{\mathrm eq}=Z^{-1}e^{-U/T_b}.
+\tag{32}\]</div>
+
+<p>这就是 <strong>Boltzmann 分布</strong>。它来自保守漂移、常数各向同性扩散和零流条件；不能无条件推广到受持续驱动的系统。</p>
+<p>定义”自由能“</p>
+<blockquote>
+<p>为什么叫它自由能，是不是有点像F=U-TS，第一项是内能，第二项T_b是温度，<span class="arithmatex">\(S=-\int\rho\log\rho\,\mathrm dx\)</span></p>
+</blockquote>
+<div class="arithmatex">\[\mathcal F[\rho]
+=\int U\rho\,\mathrm dx
++T_b\int\rho\log\rho\,\mathrm dx.
+\tag{33}\]</div>
+
+<p>其变分导数为</p>
+<div class="arithmatex">\[\frac{\delta\mathcal F}{\delta\rho}
+=U+T_b(\log\rho+1).
+\tag{34}\]</div>
+
+<p>式（31）可写成</p>
+<div class="arithmatex">\[\partial_t\rho
+=\nabla\cdot\left(
+\rho\nabla\frac{\delta\mathcal F}{\delta\rho}
+\right).
+\tag{35}\]</div>
+
+<p>在无流边界或足够快的无穷远衰减下，</p>
+<div class="arithmatex">\[\begin{aligned}
+\frac{\mathrm d\mathcal F}{\mathrm dt}
+&amp;=\int\frac{\delta\mathcal F}{\delta\rho}\,
+\partial_t\rho\,\mathrm dx\\
+&amp;=-\int\rho
+\left|\nabla\frac{\delta\mathcal F}{\delta\rho}\right|^2
+\mathrm dx\le0.
+\end{aligned}
+\tag{36}\]</div>
+
+<p>并且</p>
+<div class="arithmatex">\[\mathcal F[\rho]-\mathcal F[\rho_{\mathrm eq}]
+=T_b\,D_{\mathrm{KL}}(\rho\Vert\rho_{\mathrm eq}).
+\tag{37}\]</div>
+
+<p>式（37）说明概率流不断降低自由能：势能偏好低势能区域，熵项偏好更分散的分布，两者在 Boltzmann 分布处达到平衡。</p>
+<blockquote>
+<p>式（35）不仅是一种守恒形式。写成连续性方程</p>
+<div class="arithmatex">\[
+\partial_t\rho+\nabla\cdot(\rho v)=0,
+\qquad
+v=-\nabla\frac{\delta\mathcal F}{\delta\rho},
+\tag{58}
+\]</div>
+<p>可以把 Fokker–Planck 演化理解为自由能在概率测度空间中的梯度流。相应的离散时间变分格式为</p>
+<div class="arithmatex">\[
+\rho_{n+1}
+=\underset{\rho}{\operatorname{argmin}}
+\left\{
+\mathcal F[\rho]
++\frac{1}{2\Delta t}W_2^2(\rho,\rho_n)
+\right\}.
+\tag{59}
+\]</div>
+<p>这就是 Jordan–Kinderlehrer–Otto 格式。它适用于具有相应梯度流结构的 Fokker–Planck 方程，并非任意非平衡环流的通式。这个格式每一步都在权衡自由能的下降与搬运概率的代价。Wasserstein 距离的定义见同系列的《最优传输与分布几何》。</p>
+<p>该变分格式及其收敛到 Fokker–Planck 方程的结果见 <a href="https://epubs.siam.org/doi/10.1137/S0036141096303359">Jordan、Kinderlehrer 与 Otto（1998）</a>。</p>
+</blockquote>
+<h3 id="经典非平衡例子带旋转漂移的二维-ou-过程">经典非平衡例子：带旋转漂移的二维 OU 过程</h3>
+<p>稳态只要求 <span class="arithmatex">\(\nabla\cdot J=0\)</span>，稳态定义为 <span class="arithmatex">\(\partial_t\rho_{\mathrm ss}=0\)</span>，因此</p>
+<div class="arithmatex">\[\nabla\cdot J_{\mathrm ss}=0.
+\tag{29}\]</div>
+
+<p>这不等于 <span class="arithmatex">\(J_{\mathrm ss}=0\)</span>。详细平衡要求稳态过程在时间反演下可逆；对本文的偶变量扩散，在常见条件下它对应零稳态流。非平衡稳态可以保持固定密度，同时存在持续环流。</p>
+<p>取</p>
+<div class="arithmatex">\[\mathrm dX_t=\left(-\kappa I+\Omega R\right)X_t\,\mathrm dt
++\sqrt{2D}\,\mathrm dW_t,
+\qquad \kappa&gt;0,\quad D&gt;0,
+\qquad
+R=\begin{pmatrix}0&amp;-1\\1&amp;0\end{pmatrix}.
+\tag{38}\]</div>
+
+<p>回复项 <span class="arithmatex">\(-\kappa X\)</span> 把粒子拉回原点，反对称项 <span class="arithmatex">\(\Omega RX\)</span> 令其旋转。这里把 <span class="arithmatex">\(\Omega RX\)</span> 视为在时间反演下保持参数 <span class="arithmatex">\(\Omega\)</span> 不变的非保守旋转驱动，而不是会随时间反演变号的磁场。稳态密度为</p>
+<div class="arithmatex">\[\rho_{\mathrm ss}(x)
+=\frac{\kappa}{2\pi D}
+\exp\!\left(-\frac{\kappa|x|^2}{2D}\right),
+\tag{39}\]</div>
+
+<p>与 <span class="arithmatex">\(\Omega\)</span> 无关。然而概率流为</p>
+<div class="arithmatex">\[J_{\mathrm ss}
+=\left[(-\kappa I+\Omega R)x\right]\rho_{\mathrm ss}
+-D\nabla\rho_{\mathrm ss}
+=\Omega Rx\,\rho_{\mathrm ss}.
+\tag{40}\]</div>
+
+<p>当 <span class="arithmatex">\(\Omega=0\)</span> 时详细平衡成立；当 <span class="arithmatex">\(\Omega\ne0\)</span> 时，密度完全相同，却存在环形概率流。对应的稳态熵产生率为</p>
+<div class="arithmatex">\[\dot S_{\mathrm{tot}}
+=\int\frac{|J_{\mathrm ss}|^2}{D\rho_{\mathrm ss}}\,\mathrm dx
+=\frac{2\Omega^2}{\kappa}&gt;0.
+\tag{41}\]</div>
+
+<p>式（41）是概率流的不可逆性率。只有在偶变量、单热浴、局部详细平衡以及单位迁移率的 Einstein 关系 <span class="arithmatex">\(D=T_b\)</span> 下，它才可直接解释为以 <span class="arithmatex">\(k_B=1\)</span> 计的物理总熵产生率；更一般的热、功和时间反演规则见 <a href="https://arxiv.org/abs/1205.4176">Seifert（2012）</a>。</p>
+<p><picture><source type="image/webp" srcset="../../assets/blog/stochastic-dynamics-probability-flow/equilibrium_vs_ness_current-640.webp 640w, ../../assets/blog/stochastic-dynamics-probability-flow/equilibrium_vs_ness_current-1280.webp 1280w, ../../assets/blog/stochastic-dynamics-probability-flow/equilibrium_vs_ness_current-2024.webp 2024w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="2024" height="902" alt="相同稳态密度下的平衡与非平衡概率流" src="../../assets/blog/stochastic-dynamics-probability-flow/equilibrium_vs_ness_current.png"></picture></p>
+<p><strong>图 2｜密度相同不代表动力学相同。</strong> 两图的等高线完全相同。左图 <span class="arithmatex">\(J_{\mathrm ss}=0\)</span>；右图反对称漂移维持无散环流。只观察稳态直方图无法判断详细平衡是否破缺。</p>
+<h2 id="势垒逃逸从首达时间到-kramers-率">势垒逃逸：从首达时间到 Kramers 率</h2>
+<p>取一维双稳势 <span class="arithmatex">\(U(x)\)</span>，左侧极小值为 <span class="arithmatex">\(x_a\)</span>，势垒顶为 <span class="arithmatex">\(x^\ddagger\)</span>，势垒高度</p>
+<div class="arithmatex">\[\Delta U=U(x^\ddagger)-U(x_a).\]</div>
+
+<p>过阻尼动力学仍由式（30）描述。精确平均逃逸时间应由后向方程</p>
+<div class="arithmatex">\[-U&#x27;(x)\tau&#x27;(x)+T_b\tau&#x27;&#x27;(x)=-1
+\tag{42}\]</div>
+
+<p>配合反射与吸收边界求解。在高势垒极限 <span class="arithmatex">\(\Delta U/T_b\gg1\)</span> 下，Laplace 渐近展开给出 Kramers 逃逸率</p>
+<div class="arithmatex">\[k_{\mathrm{esc}}
+\simeq
+\frac{\sqrt{U&#x27;&#x27;(x_a)|U&#x27;&#x27;(x^\ddagger)|}}{2\pi}
+\exp\!\left(-\frac{\Delta U}{T_b}\right).
+\tag{43}\]</div>
+
+<blockquote>
+<p>这和一级相变的成核时间是一致的，<span class="arithmatex">\(\Delta U\)</span>即两相的势垒差
+</p>
+</blockquote>
+<h2 id="fp方程和前向后向-kolmogorov-方程与-feynmankac方程的关系">FP方程和前向、后向 Kolmogorov 方程与 Feynman–Kac方程的关系</h2>
+<p>定义随机过程的生成元</p>
+<div class="arithmatex">\[\mathcal L f = b_i\partial_i f +\frac12 a_{ij}\partial_i\partial_j f.\]</div>
+
+<p>再定义某个 observable <span class="arithmatex">\(g\)</span>的条件期望</p>
+<div class="arithmatex">\[u(x,t) = \mathbb E\left[ g(X_T)\mid X_t=x \right].\]</div>
+
+<p>那么核心关系可以概括成：</p>
+<p>Backward Kolmogorov</p>
+<div class="arithmatex">\[\partial_t u+\mathcal L u=0\]</div>
+
+<p>Forward Kolmogorov / Fokker--Planck</p>
+<div class="arithmatex">\[\partial_t p=\mathcal L^\dagger p\]</div>
+
+<p>而 Feynman–Kac 是对 backward Kolmogorov 的推广：</p>
+<div class="arithmatex">\[\partial_t u+\mathcal L u-Vu+f=0\]</div>
+
+<p>的解可以写成随机路径的期望值。</p>
+<p>如果从泛函分析看，定义 Markov semigroup</p>
+<div class="arithmatex">\[(P_tf)(x) = \mathbb E_x[f(X_t)].\]</div>
+
+<p>那么</p>
+<div class="arithmatex">\[P_t=e^{t\mathcal L}.\]</div>
+
+<p>因此 observable 演化：</p>
+<div class="arithmatex">\[f_t = e^{t\mathcal L}f_0.\]</div>
+
+<p>而概率密度演化：</p>
+<div class="arithmatex">\[\rho_t = e^{t\mathcal L^\dagger}\rho_0.\]</div>
+
+<p>所以</p>
+<div class="arithmatex">\[\text{Backward equation} \leftrightarrow e^{t\mathcal L}\]</div>
+
+<div class="arithmatex">\[\text{Fokker--Planck} \leftrightarrow e^{t\mathcal L^\dagger}\]</div>
+
+<p>而 Feynman–Kac 对应把生成元改成<span class="arithmatex">\(\mathcal L-V\)</span>,也就是</p>
+<div class="arithmatex">\[e^{t(\mathcal L-V)}.\]</div>
+
+<p>因此</p>
+<div class="arithmatex">\[\boxed{ \text{Fokker--Planck} = \text{Forward Kolmogorov} }\]</div>
+
+<p>而</p>
+<div class="arithmatex">\[\boxed{ \text{Backward Kolmogorov} }\]</div>
+
+<p>是它的<strong>伴随/对偶方程</strong>。</p>
+<p>最后</p>
+<div class="arithmatex">\[\boxed{ \text{Feynman--Kac} }\]</div>
+
+<p>是 backward Kolmogorov 及其带势、带 source 推广的<strong>随机路径表示</strong>。</p>
+<h2 id="时间反演与扩散生成模型">时间反演与扩散生成模型</h2>
+<h3 id="反向过程">反向过程</h3>
+<p>反向演化需要知道粒子在过去更可能从哪里来，这取决于当时的密度。因此，反向动力学除了前向漂移和噪声，还要用到密度的空间变化。下面假定密度光滑且为正。对一般扩散张量 <span class="arithmatex">\(a=\sigma\sigma^{\mathsf T}\)</span>，沿原时间坐标从 <span class="arithmatex">\(t_f\)</span> 向 <span class="arithmatex">\(0\)</span> 积分时，反向漂移为</p>
+<div class="arithmatex">\[\bar b_i(x,t)
+=b_i(x,t)
+-\frac{1}{\rho_t(x)}\partial_j\!\left[a_{ij}(x,t)\rho_t(x)\right].
+\tag{44}\]</div>
+
+<p>即</p>
+<div class="arithmatex">\[\bar b_i=b_i-\partial_j a_{ij}-a_{ij}\partial_j\log\rho_t.
+\tag{45}\]</div>
+
+<p>若噪声为与状态无关的各向同性形式 <span class="arithmatex">\(\sigma=g(t)I\)</span>，则</p>
+<div class="arithmatex">\[\boxed{
+\mathrm dX_t=\left[b(X_t,t)-g(t)^2\nabla_x\log\rho_t(X_t)\right]\mathrm dt
++g(t)\,\mathrm d\bar W_t,
+\quad \mathrm dt&lt;0
+}
+\tag{46}\]</div>
+
+<p>其中</p>
+<div class="arithmatex">\[s_t(x)=\nabla_x\log\rho_t(x)
+\tag{47}\]</div>
+
+<p>称为 score。若改用正向增加的反向时间 <span class="arithmatex">\(s=t_f-t\)</span>，式（46）的整体漂移符号随变量变换改变。</p>
+<h3 id="probability-flow-ode">Probability-flow ODE</h3>
+<p>考虑</p>
+<div class="arithmatex">\[\mathrm dX_t=f(X_t,t)\,\mathrm dt+g(t)\,\mathrm dW_t.
+\tag{48}\]</div>
+
+<p>其 Fokker–Planck 方程可改写为</p>
+<div class="arithmatex">\[\begin{aligned}
+\partial_t p_t
+&amp;=-\nabla\cdot(fp_t)+\frac12g^2\Delta p_t\\
+&amp;=-\nabla\cdot\left[
+\left(f-\frac12g^2\nabla\log p_t\right)p_t
+\right].
+\end{aligned}
+\tag{49}\]</div>
+
+<p>因此确定性 ODE</p>
+<div class="arithmatex">\[\boxed{
+\frac{\mathrm dX_t}{\mathrm dt}
+=f(X_t,t)-\frac12g(t)^2s_t(X_t)
+}
+\tag{50}\]</div>
+
+<p>与正向 SDE 具有相同的单时刻边缘密度 <span class="arithmatex">\(p_t\)</span>。这里的“相同”不包括路径测度：SDE 轨道有随机二次变差，ODE 轨道是确定性的。</p>
+<p>反向 SDE、score 网络与 probability-flow ODE 的生成模型统一表述见 <a href="https://openreview.net/forum?id=PxTIG12RRHS">Song 等（2021）</a>。</p>
+<h2 id="参考资料">参考资料</h2>
+<p>以下资料给出本文使用的标准结果。</p>
+<ol>
+<li>C. Gardiner, <em>Stochastic Methods</em>, 4th ed.：物理取向的 Markov 过程、Fokker–Planck 与随机方法教材。<a href="https://link.springer.com/book/9783540707127">Springer</a></li>
+<li>N. G. van Kampen, <em>Stochastic Processes in Physics and Chemistry</em>, 3rd ed.：主方程、Fokker–Planck、Langevin 与 Itô–Stratonovich 问题。<a href="https://shop.elsevier.com/books/stochastic-processes-in-physics-and-chemistry/van-kampen/978-0-444-52965-7">Elsevier</a></li>
+<li>B. Øksendal, <em>Stochastic Differential Equations</em>, 6th ed.：Itô 公式、扩散过程、边值问题与 Feynman–Kac 的较严格入口。<a href="https://link.springer.com/book/10.1007/978-3-642-14394-6">Springer</a></li>
+<li>G. E. Uhlenbeck and L. S. Ornstein, “On the Theory of the Brownian Motion,” <em>Phys. Rev.</em> <strong>36</strong>, 823 (1930)：OU 过程的经典来源。<a href="https://journals.aps.org/pr/abstract/10.1103/PhysRev.36.823">APS</a></li>
+<li>H. A. Kramers, “Brownian Motion in a Field of Force and the Diffusion Model of Chemical Reactions,” <em>Physica</em> <strong>7</strong>, 284 (1940)：势垒逃逸与 Kramers 方程。<a href="https://doi.org/10.1016/S0031-8914(40)90098-2">DOI</a></li>
+<li>U. Seifert, “Stochastic Thermodynamics, Fluctuation Theorems and Molecular Machines,” <em>Rep. Prog. Phys.</em> <strong>75</strong>, 126001 (2012)：轨道热力学、熵产生和非平衡稳态。<a href="https://arxiv.org/abs/1205.4176">arXiv</a></li>
+<li>B. D. O. Anderson, “Reverse-time Diffusion Equation Models,” <em>Stochastic Processes and their Applications</em> <strong>12</strong>, 313 (1982)：扩散过程时间反演公式。<a href="https://doi.org/10.1016/0304-4149(82)90051-5">DOI</a></li>
+<li>Y. Song et al., “Score-Based Generative Modeling through Stochastic Differential Equations,” ICLR 2021：反向 SDE、probability-flow ODE 与 score 模型统一框架。<a href="https://openreview.net/forum?id=PxTIG12RRHS">OpenReview</a></li>
+<li>R. Jordan, D. Kinderlehrer, and F. Otto, “The Variational Formulation of the Fokker–Planck Equation,” <em>SIAM J. Math. Anal.</em> <strong>29</strong>, 1 (1998)：Fokker–Planck 的 Wasserstein 梯度流与 JKO 格式。<a href="https://epubs.siam.org/doi/10.1137/S0036141096303359">SIAM</a></li>
+</ol>
+                </div>
+            </div>
+
+            <footer class="article-footer">
+                <a href="../../#blog">← 返回博客</a>
+                <a href="../../rights.html">版权与引用</a>
+                <a href="https://github.com/xixi-cc/xixi-cc.github.io">查看主页源码</a>
+            </footer>
+        </article>
+    </main>
+    <!-- Cloudflare Web Analytics -->
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"73522e5dee9b42b0be84b4847e4dd502"}'></script>
+    <!-- End Cloudflare Web Analytics -->
+</body>
+</html>

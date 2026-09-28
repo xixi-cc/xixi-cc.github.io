@@ -1,5 +1,13 @@
 [
   {
+    "slug": "stochastic-dynamics-probability-flow",
+    "source": "stochastic-dynamics-probability-flow.md",
+    "description": "从 Langevin 动力学与 Fokker–Planck 方程出发，讨论概率流、平衡与非平衡稳态、Kolmogorov 与 Feynman–Kac 的关系，以及扩散生成模型。",
+    "published": "2026-09-28",
+    "category": "随机过程",
+    "image": "assets/blog/stochastic-dynamics-probability-flow/langevin_fp_correspondence.png"
+  },
+  {
     "slug": "numerical-simulation-notes",
     "source": "numerical-simulation-notes.md",
     "description": "面向 C++ 粒子模拟与场模拟的性能优化方向：从算法、内存和 CPU/GPU 并行，到随机数、I/O 与基准测试。",

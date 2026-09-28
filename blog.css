@@ -294,6 +294,13 @@
 
 .article-content blockquote p:last-child { margin-bottom: 0; }
 
+/* Keep long display equations scrollable within the article, including quotes. */
+.article-content div.arithmatex {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
 .article-content hr {
     margin: 50px 0;
     border: 0;
