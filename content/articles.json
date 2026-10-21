@@ -16,6 +16,14 @@
     "image": "assets/blog/stochastic-thermodynamics-arrow-of-time/rotational_ou_steady_current.png"
   },
   {
+    "slug": "optimal-transport-wasserstein-geometry",
+    "source": "optimal-transport-wasserstein-geometry.md",
+    "description": "从最优传输与 Wasserstein 测地线出发，讨论自由能梯度流、JKO 格式、Schrödinger Bridge 与 Flow Matching。",
+    "published": "2026-10-11",
+    "category": "概率与几何",
+    "image": "assets/blog/optimal-transport-wasserstein-geometry/quantile_ot_geodesic.png"
+  },
+  {
     "slug": "stochastic-dynamics-probability-flow",
     "source": "stochastic-dynamics-probability-flow.md",
     "description": "从 Langevin 动力学与 Fokker–Planck 方程出发，讨论概率流、平衡与非平衡稳态、Kolmogorov 与 Feynman–Kac 的关系，以及扩散生成模型。",
