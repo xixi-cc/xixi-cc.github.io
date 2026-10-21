@@ -1,5 +1,21 @@
 [
   {
+    "slug": "nonlinear-dynamics",
+    "source": "nonlinear-dynamics.md",
+    "description": "从固定点、势函数与分岔出发，讨论极限环、相位约化、混沌与有限预测时域。",
+    "published": "2026-10-21",
+    "category": "非线性动力学",
+    "image": "assets/blog/nonlinear-dynamics/local_bifurcations.png"
+  },
+  {
+    "slug": "stochastic-thermodynamics-arrow-of-time",
+    "source": "stochastic-thermodynamics-arrow-of-time.md",
+    "description": "从正反轨迹的概率比出发，讨论熵产生、非平衡稳态环流、涨落定理，以及功与自由能的关系。",
+    "published": "2026-10-21",
+    "category": "非平衡统计物理",
+    "image": "assets/blog/stochastic-thermodynamics-arrow-of-time/rotational_ou_steady_current.png"
+  },
+  {
     "slug": "stochastic-dynamics-probability-flow",
     "source": "stochastic-dynamics-probability-flow.md",
     "description": "从 Langevin 动力学与 Fokker–Planck 方程出发，讨论概率流、平衡与非平衡稳态、Kolmogorov 与 Feynman–Kac 的关系，以及扩散生成模型。",

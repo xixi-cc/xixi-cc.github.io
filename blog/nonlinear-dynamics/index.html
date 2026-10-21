@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>非线性动力学 · 曹溪能</title>
+    <meta name="description" content="从固定点、势函数与分岔出发，讨论极限环、相位约化、混沌与有限预测时域。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://xixi-cc.github.io/blog/nonlinear-dynamics/">
+    <meta property="og:title" content="非线性动力学">
+    <meta property="og:description" content="从固定点、势函数与分岔出发，讨论极限环、相位约化、混沌与有限预测时域。">
+    <meta property="og:image" content="https://xixi-cc.github.io/assets/blog/nonlinear-dynamics/local_bifurcations.png">
+    <meta name="twitter:image" content="https://xixi-cc.github.io/assets/blog/nonlinear-dynamics/local_bifurcations.png">
+    <meta property="article:published_time" content="2026-10-21">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="非线性动力学">
+    <meta name="twitter:description" content="从固定点、势函数与分岔出发，讨论极限环、相位约化、混沌与有限预测时域。">
+    <link rel="canonical" href="https://xixi-cc.github.io/blog/nonlinear-dynamics/">
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "非线性动力学", "description": "从固定点、势函数与分岔出发，讨论极限环、相位约化、混沌与有限预测时域。", "datePublished": "2026-10-21", "dateModified": "2026-10-21", "inLanguage": "zh-CN", "url": "https://xixi-cc.github.io/blog/nonlinear-dynamics/", "mainEntityOfPage": "https://xixi-cc.github.io/blog/nonlinear-dynamics/", "author": {"@type": "Person", "name": "Xineng Cao", "alternateName": ["Xixi Cao", "曹溪能"], "url": "https://xixi-cc.github.io/"}}</script>
+    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="../../blog.css">
+    <script>
+        window.MathJax = {
+            chtml: {fontURL: '../../assets/mathjax/output/chtml/fonts/woff-v2'},
+            options: {enableMenu: false}
+        };
+    </script>
+    <script defer src="../../assets/mathjax/tex-mml-chtml.js"></script>
+
+</head>
+<body class="article-page">
+    <header class="topbar">
+        <nav aria-label="主导航">
+            <a href="../../">主页</a>
+            <a href="../../#reading">论文追踪</a>
+            <a href="../../#blog" aria-current="page">博客</a>
+        </nav>
+    </header>
+
+    <main class="article-shell">
+        <article class="blog-article">
+            <header class="article-header">
+                <p class="article-kicker"><a href="../../#blog">研究笔记</a></p>
+                <h1>非线性动力学</h1>
+                <p class="article-meta"><time datetime="2026-10-21">2026 年 10 月 21 日</time> · 非线性动力学</p>
+            </header>
+
+            <details class="article-outline">
+                <summary>文章目录</summary>
+                <div class="toc">
+<ul>
+<li><a href="#相空间">相空间</a><ul>
+<li><a href="#连续流与离散映射">连续流与离散映射</a></li>
+</ul>
+</li>
+<li><a href="#固定点与局部稳定性">固定点与局部稳定性</a><ul>
+<li><a href="#jacobian-与扰动增长">Jacobian 与扰动增长</a></li>
+<li><a href="#lyapunov-函数与稳定性">Lyapunov 函数与稳定性</a></li>
+<li><a href="#鞍结分岔">鞍结分岔</a></li>
+<li><a href="#跨临界分岔">跨临界分岔</a></li>
+<li><a href="#叉形分岔">叉形分岔</a></li>
+<li><a href="#hopf-分岔">Hopf 分岔</a></li>
+<li><a href="#分岔与相变">分岔与相变</a></li>
+</ul>
+</li>
+<li><a href="#极限环">极限环</a><ul>
+<li><a href="#van-der-pol-振子的振幅选择">Van der Pol 振子的振幅选择</a></li>
+<li><a href="#poincaré-截面与返回映射">Poincaré 截面与返回映射</a></li>
+<li><a href="#极限环附近的相位约化">极限环附近的相位约化</a></li>
+</ul>
+</li>
+<li><a href="#混沌与有限预测时域">混沌与有限预测时域</a><ul>
+<li><a href="#初值敏感性与-lyapunov-指数">初值敏感性与 Lyapunov 指数</a></li>
+<li><a href="#logistic-映射与倍周期分岔">Logistic 映射与倍周期分岔</a></li>
+<li><a href="#lorenz-系统耗散伸展与折叠">Lorenz 系统：耗散、伸展与折叠</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+            </details>
+
+            <div class="article-layout">
+                <div class="article-content">
+                    <h2 id="相空间">相空间</h2>
+<h3 id="连续流与离散映射">连续流与离散映射</h3>
+<p>自治连续系统写成</p>
+<div class="arithmatex">\[\dot{\boldsymbol x}=\boldsymbol f(\boldsymbol x;\mu),
+\qquad
+\boldsymbol x\in M\subseteq\mathbb R^d,
+\tag{2}\]</div>
+
+<p>其中 <span class="arithmatex">\(\mu\)</span> 是控制参数。给定初态 <span class="arithmatex">\(\boldsymbol x_0\)</span>，若解在所考虑时间内存在且唯一，便定义流</p>
+<div class="arithmatex">\[\Phi^t_\mu(\boldsymbol x_0)=\boldsymbol x(t),
+\qquad
+\Phi^{t+s}_\mu=\Phi^t_\mu\circ\Phi^s_\mu.
+\tag{3}\]</div>
+
+<p>离散系统则由映射迭代：</p>
+<div class="arithmatex">\[\boldsymbol x_{n+1}=F_\mu(\boldsymbol x_n),
+\qquad
+\boldsymbol x_n=F_\mu^n(\boldsymbol x_0).
+\tag{4}\]</div>
+
+<h2 id="固定点与局部稳定性">固定点与局部稳定性</h2>
+<h3 id="jacobian-与扰动增长">Jacobian 与扰动增长</h3>
+<p>固定点 <span class="arithmatex">\(\boldsymbol x^*\)</span> 满足</p>
+<div class="arithmatex">\[\boldsymbol f(\boldsymbol x^*;\mu)=\boldsymbol 0.
+\tag{7}\]</div>
+
+<p>令 <span class="arithmatex">\(\boldsymbol x=\boldsymbol x^*+\boldsymbol\xi\)</span>，Taylor 展开为</p>
+<div class="arithmatex">\[\dot{\boldsymbol\xi}
+=J(\boldsymbol x^*)\boldsymbol\xi
++O(\|\boldsymbol\xi\|^2),
+\qquad
+J_{ij}=\left.\frac{\partial f_i}{\partial x_j}\right|_{\boldsymbol x^*}.
+\tag{8}\]</div>
+
+<p>每个线性模式按 <span class="arithmatex">\(e^{\lambda t}\)</span> 演化：实部决定增长或衰减，虚部决定振荡。所有特征值实部为负时，固定点局部渐近稳定；至少一个实部为正时，它不稳定。没有特征值落在虚轴上称为双曲情形，此时附近轨道的定性结构可由线性化判断。</p>
+<p>当存在 <span class="arithmatex">\(\operatorname{Re}\lambda=0\)</span> 时，线性项不能决定对应方向的稳定性。此时需要更高阶项。分岔恰好经常发生在这种非双曲情形。</p>
+<h3 id="lyapunov-函数与稳定性">Lyapunov 函数与稳定性</h3>
+<p>若存在标量函数 <span class="arithmatex">\(V(\boldsymbol x)\)</span>，在 <span class="arithmatex">\(\boldsymbol x^*\)</span> 附近满足</p>
+<div class="arithmatex">\[V(\boldsymbol x^*)=0,
+\quad V(\boldsymbol x)&gt;0,
+\quad
+\dot V=\nabla V\cdot\boldsymbol f\le0,
+\tag{11}\]</div>
+
+<p>则 <span class="arithmatex">\(\boldsymbol x^*\)</span> 稳定；若除固定点外 <span class="arithmatex">\(\dot V&lt;0\)</span>，通常可得局部渐近稳定。Lyapunov 函数给出单调量，像沿着能量地形下行；后文的 Lyapunov <strong>指数</strong>则测量相邻轨道的分离率。</p>
+<h3 id="鞍结分岔">鞍结分岔</h3>
+<div class="arithmatex">\[\dot x=\mu-x^2.
+\tag{13}\]</div>
+
+<p>当 <span class="arithmatex">\(\mu&gt;0\)</span> 时有</p>
+<div class="arithmatex">\[x_\pm^*=\pm\sqrt\mu,
+\qquad
+f&#x27;(x_\pm^*)=-2x_\pm^*.
+\tag{14}\]</div>
+
+<p>所以正支稳定、负支不稳定；<span class="arithmatex">\(\mu&lt;0\)</span> 时局部没有固定点。临界点 <span class="arithmatex">\(\mu=0\)</span> 处线性化特征值为零，松弛时间发散，这就是局部意义的临界慢化。</p>
+<h3 id="跨临界分岔">跨临界分岔</h3>
+<div class="arithmatex">\[\dot x=\mu x-x^2=x(\mu-x)
+\tag{15}\]</div>
+
+<p>有固定点 <span class="arithmatex">\(x^*=0,\mu\)</span>。因为</p>
+<div class="arithmatex">\[f&#x27;(0)=\mu,
+\qquad
+f&#x27;(\mu)=-\mu,
+\tag{16}\]</div>
+
+<p>两支在 <span class="arithmatex">\(\mu=0\)</span> 交换稳定性。</p>
+<h3 id="叉形分岔">叉形分岔</h3>
+<p>超临界叉形正规形为</p>
+<div class="arithmatex">\[\dot x=\mu x-x^3.
+\tag{17}\]</div>
+
+<p>方程具有 <span class="arithmatex">\(x\mapsto-x\)</span> 对称性。<span class="arithmatex">\(\mu&lt;0\)</span> 时原点稳定；<span class="arithmatex">\(\mu&gt;0\)</span> 时原点失稳，并产生两个稳定分支</p>
+<div class="arithmatex">\[x_\pm^*=\pm\sqrt\mu.
+\tag{18}\]</div>
+
+<h3 id="hopf-分岔">Hopf 分岔</h3>
+<p>超临界 Hopf 正规形可写成复振幅方程</p>
+<div class="arithmatex">\[\dot z=(\mu+i\omega_0)z-|z|^2z,
+\qquad z=re^{i\theta}.
+\tag{19}\]</div>
+
+<p>极坐标下</p>
+<div class="arithmatex">\[\dot r=\mu r-r^3,
+\qquad
+\dot\theta=\omega_0.
+\tag{20}\]</div>
+
+<p>当 <span class="arithmatex">\(\mu&lt;0\)</span> 时 <span class="arithmatex">\(r=0\)</span> 稳定；当 <span class="arithmatex">\(\mu&gt;0\)</span> 时原点失稳，并出现半径</p>
+<div class="arithmatex">\[r_*=\sqrt\mu
+\tag{21}\]</div>
+
+<p>的稳定极限环。线性增长 <span class="arithmatex">\(\mu r\)</span> 把振幅推离零，非线性阻尼 <span class="arithmatex">\(-r^3\)</span> 阻止它无限增大，两者平衡选出振幅。这是超临界 Hopf 的典型图景；一般系统还需一对共轭特征值非退化地横穿虚轴，其余特征值远离虚轴。</p>
+<p>前三种一维动力学可以写成势函数的梯度形式：</p>
+<div class="arithmatex">\[\dot x=-\partial_x V(x;\mu).\]</div>
+
+<p>Hopf 正规形的径向方程同样可写成 <span class="arithmatex">\(\dot r=-\partial_r V(r;\mu)\)</span>，角向运动仍为 <span class="arithmatex">\(\dot\theta=\omega_0\)</span>。</p>
+<p><picture><source type="image/webp" srcset="../../assets/blog/nonlinear-dynamics/local_bifurcations-640.webp 640w, ../../assets/blog/nonlinear-dynamics/local_bifurcations-1280.webp 1280w, ../../assets/blog/nonlinear-dynamics/local_bifurcations-1800.webp 1800w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="1800" height="1260" alt="不同控制参数下的势函数曲线" src="../../assets/blog/nonlinear-dynamics/local_bifurcations.png"></picture></p>
+<p><strong>图 1｜不同控制参数下的势函数。</strong> 不同颜色对应 <span class="arithmatex">\(\mu=-0.8,0,0.8\)</span>，各曲线取 <span class="arithmatex">\(V(0)=0\)</span>。圆点标出稳定固定点；菱形标出叉形与 Hopf 径向方程在 <span class="arithmatex">\(\mu=0\)</span> 时仍稳定、但曲率为零的临界点。运动沿势函数下降。Hopf 面板中的非零半径标记表示稳定振幅，对应完整系统的极限环。</p>
+<h3 id="分岔与相变">分岔与相变</h3>
+<p>平均场相变理论用序参量的自由能全局极小值判断平衡态；若其弛豫动力学为 <span class="arithmatex">\(\dot x=-\partial_x V\)</span>，自由能形状的改变便可用分岔描述。图 1 中的四种情况有如下对应：</p>
+<table>
+<thead>
+<tr>
+<th>分岔</th>
+<th>平均场相变中的对应</th>
+<th>势函数图像与序参量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>鞍结</td>
+<td>一级相变中亚稳态消失的旋节（spinodal）点</td>
+<td>局部极小值与极大值相遇，势阱消失；一级相变的平衡共存点则由两个势阱等深确定，通常不在鞍结处。</td>
+</tr>
+<tr>
+<td>跨临界</td>
+<td>非负序参量的连续相变</td>
+<td>限制 <span class="arithmatex">\(x\geq0\)</span> 后，稳定态由 <span class="arithmatex">\(x^*=0\)</span> 连续变为 <span class="arithmatex">\(x^*=\mu\)</span>，平均场标度为 <span class="arithmatex">\(x^*\propto\mu\)</span>。</td>
+</tr>
+<tr>
+<td>超临界叉形</td>
+<td>零场 Ising 型二阶连续相变</td>
+<td>单阱变为对称双阱，序参量连续出现：<span class="arithmatex">\(x^*=\pm\sqrt\mu\)</span>，即平均场指数 <span class="arithmatex">\(\beta=1/2\)</span>。</td>
+</tr>
+<tr>
+<td>超临界 Hopf</td>
+<td>连续的非平衡振荡转变</td>
+<td>稳定振幅由零连续增大为 <span class="arithmatex">\(r_*=\sqrt\mu\)</span>。径向势形似 Landau 势，角向旋转使有序态成为周期运动。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="极限环">极限环</h2>
+<h3 id="van-der-pol-振子的振幅选择">Van der Pol 振子的振幅选择</h3>
+<p>Van der Pol 方程为</p>
+<div class="arithmatex">\[\ddot x-\varepsilon(1-x^2)\dot x+x=0,
+\qquad \varepsilon&gt;0.
+\tag{22}\]</div>
+
+<p>定义线性振子能量 <span class="arithmatex">\(E=(x^2+\dot x^2)/2\)</span>，则</p>
+<div class="arithmatex">\[\dot E=\varepsilon(1-x^2)\dot x^2.
+\tag{23}\]</div>
+
+<p>当 <span class="arithmatex">\(|x|&lt;1\)</span> 时系统向振动注入能量；当 <span class="arithmatex">\(|x|&gt;1\)</span> 时耗散能量。小振幅被放大，大振幅在一周期内受到更强耗散，直到每周期的注入与损失平衡，形成稳定的自激振荡。</p>
+<p><picture><source type="image/webp" srcset="../../assets/blog/nonlinear-dynamics/limit_cycle_phase-640.webp 640w, ../../assets/blog/nonlinear-dynamics/limit_cycle_phase-1280.webp 1280w, ../../assets/blog/nonlinear-dynamics/limit_cycle_phase-1980.webp 1980w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="1980" height="756" alt="Van der Pol 振子的稳定极限环" src="../../assets/blog/nonlinear-dynamics/limit_cycle_phase.png"></picture></p>
+<p><strong>图 2｜极限环吸引不同初态，但不抹去相位差。</strong></p>
+<h3 id="poincaré-截面与返回映射">Poincaré 截面与返回映射</h3>
+<p>选择与流横截的 <span class="arithmatex">\((d-1)\)</span> 维曲面 <span class="arithmatex">\(\Sigma\)</span>，定义相邻交点的返回映射</p>
+<div class="arithmatex">\[\boldsymbol y_{n+1}=P(\boldsymbol y_n).
+\tag{24}\]</div>
+
+<p>连续系统的周期轨道对应 <span class="arithmatex">\(P\)</span> 的固定点 <span class="arithmatex">\(\boldsymbol y^*\)</span>。若 <span class="arithmatex">\(DP(\boldsymbol y^*)\)</span> 的全部特征值模小于 1，极限环横向稳定。这些特征值是非平凡 Floquet 乘子；自治系统沿轨道切向总有一个中性乘子 1，对应时间平移。</p>
+<h3 id="极限环附近的相位约化">极限环附近的相位约化</h3>
+<p>若横向扰动快速衰减，可用相位 <span class="arithmatex">\(\theta\)</span> 描述轨道位置：</p>
+<div class="arithmatex">\[\dot\theta=\omega.
+\tag{25}\]</div>
+
+<p>加入弱扰动 <span class="arithmatex">\(\epsilon\boldsymbol p(t)\)</span> 后，一阶相位约化为</p>
+<div class="arithmatex">\[\dot\theta
+=\omega
++\epsilon\boldsymbol Z(\theta)\cdot\boldsymbol p(t)
++O(\epsilon^2),
+\tag{26}\]</div>
+
+<p>其中 <span class="arithmatex">\(\boldsymbol Z(\theta)=\nabla_{\boldsymbol x}\Theta|_{\boldsymbol x_0(\theta)}\)</span> 是相位响应曲线。它测量在某一相位施加小扰动会让时钟提前还是延后。</p>
+<p>弱耦合振子经平均后常得到 Kuramoto 型模型</p>
+<div class="arithmatex">\[\dot\theta_i
+=\omega_i
++\frac{K}{N}\sum_{j=1}^N
+\sin(\theta_j-\theta_i).
+\tag{27}\]</div>
+
+<p>复序参量</p>
+<div class="arithmatex">\[Re^{i\Psi}
+=\frac1N\sum_{j=1}^N e^{i\theta_j}
+\tag{28}\]</div>
+
+<p>把相干程度压缩为 <span class="arithmatex">\(R\in[0,1]\)</span>。同步阈值依赖频率分布、耦合拓扑和有限尺寸。</p>
+<h2 id="混沌与有限预测时域">混沌与有限预测时域</h2>
+<h3 id="初值敏感性与-lyapunov-指数">初值敏感性与 Lyapunov 指数</h3>
+<p>对连续系统，微小扰动满足切向方程</p>
+<div class="arithmatex">\[\dot{\boldsymbol\delta}
+=J\bigl(\boldsymbol x(t)\bigr)\boldsymbol\delta.
+\tag{29}\]</div>
+
+<p>由 <span class="arithmatex">\(\boldsymbol\delta(t)=D\Phi^t(\boldsymbol x_0)\boldsymbol\delta(0)\)</span>，最大 Lyapunov 指数可定义为</p>
+<div class="arithmatex">\[\lambda_{\max}(\boldsymbol x_0)
+=\limsup_{t\to\infty}
+\frac1t\log
+\bigl\|D\Phi^t(\boldsymbol x_0)\bigr\|.
+\tag{30}\]</div>
+
+<p>正的 <span class="arithmatex">\(\lambda_{\max}\)</span> 表示近邻轨道沿某个方向平均指数分离，微小初值误差因而会被放大。这里跟踪的是无穷小扰动的长期增长率；有限轨道只能给出估计，需检查采样长度和噪声的影响。</p>
+<p>若初始误差为 <span class="arithmatex">\(\delta_0\)</span>，容许误差为 <span class="arithmatex">\(\Delta\)</span>，指数增长阶段的预测时域约为</p>
+<div class="arithmatex">\[T_{\mathrm{pred}}
+\simeq
+\frac1{\lambda_{\max}}
+\log\frac{\Delta}{\delta_0}.
+\tag{31}\]</div>
+
+<h3 id="logistic-映射与倍周期分岔">Logistic 映射与倍周期分岔</h3>
+<p>离散 logistic 映射为</p>
+<div class="arithmatex">\[x_{n+1}=F_r(x_n)=rx_n(1-x_n),
+\qquad 0\le x_n\le1,\quad 0\le r\le4.
+\tag{32}\]</div>
+
+<p>非零固定点 <span class="arithmatex">\(x^*=1-1/r\)</span> 的乘子是</p>
+<div class="arithmatex">\[F_r&#x27;(x^*)=2-r.
+\tag{33}\]</div>
+
+<p>因此它在 <span class="arithmatex">\(1&lt;r&lt;3\)</span> 稳定，并在 <span class="arithmatex">\(r=3\)</span> 失稳。随后出现倍周期级联和周期窗口。对一维映射，沿轨道的 Lyapunov 指数为</p>
+<p><div class="arithmatex">\[\lambda
+=\lim_{N\to\infty}
+\frac1N\sum_{n=0}^{N-1}
+\log|F_r&#x27;(x_n)|.
+\tag{34}\]</div></p>
+<p><span class="arithmatex">\(\lambda&gt;0\)</span> 支持敏感依赖，但在有限样本中仍要排除瞬态、周期窗口、测量噪声和数值舍入。</p>
+<h3 id="lorenz-系统耗散伸展与折叠">Lorenz 系统：耗散、伸展与折叠</h3>
+<p>Lorenz 方程为</p>
+<div class="arithmatex">\[\dot x=\sigma(y-x),
+\qquad
+\dot y=x(\rho-z)-y,
+\qquad
+\dot z=xy-\beta z.
+\tag{35}\]</div>
+
+<p>其散度恒为</p>
+<div class="arithmatex">\[\nabla\cdot\boldsymbol f
+=-(\sigma+1+\beta)&lt;0,
+\tag{36}\]</div>
+
+<p>所以任意小体积按 <span class="arithmatex">\(e^{-(\sigma+1+\beta)t}\)</span> 收缩。<span class="arithmatex">\(\rho&gt;1\)</span> 时，除原点外还有两个对称固定点</p>
+<div class="arithmatex">\[(x^*,y^*,z^*)
+=\left(\pm\sqrt{\beta(\rho-1)},
+\pm\sqrt{\beta(\rho-1)},
+\rho-1\right).
+\tag{37}\]</div>
+
+<p>负散度只证明无穷小体积收缩，不证明轨道有界。对 Lorenz 方程，可另外取径向无界的二次函数</p>
+<div class="arithmatex">\[\mathcal V=\rho x^2+\sigma y^2+\sigma(z-2\rho)^2,
+\qquad
+\dot{\mathcal V}
+=-2\sigma\left[\rho x^2+y^2+\beta(z-\rho)^2-\beta\rho^2\right].\]</div>
+
+<p>在足够大的椭球之外 <span class="arithmatex">\(\dot{\mathcal V}&lt;0\)</span>，运动会被推回有界区域。在经典参数 <span class="arithmatex">\((\sigma,\rho,\beta)=(10,28,8/3)\)</span> 下，轨道在两个叶片间不规则切换：局部伸展放大误差，折叠把轨道送回已经访问过的区域，耗散又不断压缩体积。伸展与收缩可以同时发生，因为它们作用在不同方向上。经典 Lorenz 吸引子的严格存在性见 <a href="https://pi.math.cornell.edu/~warwick/main/papers.html">Tucker 的证明</a>。</p>
+<p><picture><source type="image/webp" srcset="../../assets/blog/nonlinear-dynamics/logistic_lorenz-640.webp 640w, ../../assets/blog/nonlinear-dynamics/logistic_lorenz-1280.webp 1280w, ../../assets/blog/nonlinear-dynamics/logistic_lorenz-1980.webp 1980w" sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 914px) calc(100vw - 64px), 850px"><img loading="lazy" decoding="async" width="1980" height="756" alt="Logistic 映射的分岔图与 Lorenz 吸引子" src="../../assets/blog/nonlinear-dynamics/logistic_lorenz.png"></picture></p>
+<p><strong>图 3｜Logistic 映射与 Lorenz 吸引子。</strong> 左：Logistic 映射的长期迭代值随参数 <span class="arithmatex">\(r\)</span> 的变化，展示倍周期分岔、混沌区及其中的周期窗口。右：<span class="arithmatex">\((\sigma,\rho,\beta)=(10,28,8/3)\)</span> 时 Lorenz 轨道在 <span class="arithmatex">\(x\)</span>–<span class="arithmatex">\(z\)</span> 平面的投影。</p>
+                </div>
+            </div>
+
+            <footer class="article-footer">
+                <a href="../../#blog">← 返回博客</a>
+                <a href="../../rights.html">版权与引用</a>
+                <a href="https://github.com/xixi-cc/xixi-cc.github.io">查看主页源码</a>
+            </footer>
+        </article>
+    </main>
+    <!-- Cloudflare Web Analytics -->
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"73522e5dee9b42b0be84b4847e4dd502"}'></script>
+    <!-- End Cloudflare Web Analytics -->
+</body>
+</html>
