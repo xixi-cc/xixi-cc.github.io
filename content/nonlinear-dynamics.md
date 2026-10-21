@@ -359,9 +359,3 @@ $$
 ![Logistic 映射的分岔图与 Lorenz 吸引子](../../assets/blog/nonlinear-dynamics/logistic_lorenz.png)
 
 **图 3｜Logistic 映射与 Lorenz 吸引子。** 左：Logistic 映射的长期迭代值随参数 \(r\) 的变化，展示倍周期分岔、混沌区及其中的周期窗口。右：\((\sigma,\rho,\beta)=(10,28,8/3)\) 时 Lorenz 轨道在 \(x\)–\(z\) 平面的投影。
-
-
-
-
-
-

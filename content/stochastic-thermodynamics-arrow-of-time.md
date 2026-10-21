@@ -556,4 +556,3 @@ $$
 6. T. Hatano and S.-i. Sasa, “Steady-State Thermodynamics of Langevin Systems,” *Physical Review Letters* **86**, 3463–3466 (2001), DOI: [10.1103/PhysRevLett.86.3463](https://doi.org/10.1103/PhysRevLett.86.3463)。
 7. A. C. Barato and U. Seifert, “Thermodynamic Uncertainty Relation for Biomolecular Processes,” *Physical Review Letters* **114**, 158101 (2015), DOI: [10.1103/PhysRevLett.114.158101](https://doi.org/10.1103/PhysRevLett.114.158101)。
 8. J. Ho, A. Jain, and P. Abbeel, “Denoising Diffusion Probabilistic Models,” *Advances in Neural Information Processing Systems* **33**, 6840–6851 (2020), [official proceedings](https://proceedings.neurips.cc/paper/2020/hash/4c5bcfec8584af0d967f1ab10179ca4b-Abstract.html)。
-
